@@ -1,0 +1,43 @@
+{
+  "processes": {
+    "nextjs-dev": {
+      "command": "pnpm",
+      "args": ["dev"],
+      "cwd": ".",
+      "startupDelay": 3000,
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "nextjs-build": {
+      "command": "pnpm",
+      "args": ["build"],
+      "cwd": ".",
+      "startupDelay": 2000,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "nextjs-start": {
+      "command": "pnpm",
+      "args": ["start"],
+      "cwd": ".",
+      "startupDelay": 2000,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "lint": {
+      "command": "pnpm",
+      "args": ["lint"],
+      "cwd": ".",
+      "startupDelay": 1000
+    },
+    "typecheck": {
+      "command": "npx",
+      "args": ["tsc", "--noEmit"],
+      "cwd": ".",
+      "startupDelay": 2000
+    }
+  }
+}

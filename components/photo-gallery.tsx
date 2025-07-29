@@ -3,13 +3,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Camera, X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
-import { useState } from "react"
+import { Camera, X, ZoomIn } from "lucide-react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel"
 
 export default function PhotoGallery() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const [count, setCount] = useState(0)
 
   const photos = [
     {
@@ -47,6 +51,19 @@ export default function PhotoGallery() {
     },
   ]
 
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    setCount(api.scrollSnapList().length)
+    setCurrent(api.selectedScrollSnap() + 1)
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1)
+    })
+  }, [api])
+
   const openPhoto = (index: number) => {
     setSelectedPhotoIndex(index)
     setIsDialogOpen(true)
@@ -57,17 +74,6 @@ export default function PhotoGallery() {
     setSelectedPhotoIndex(null)
   }
 
-  const navigatePhoto = (direction: "prev" | "next") => {
-    if (selectedPhotoIndex === null) return
-
-    if (direction === "prev") {
-      setSelectedPhotoIndex(selectedPhotoIndex > 0 ? selectedPhotoIndex - 1 : photos.length - 1)
-    } else {
-      setSelectedPhotoIndex(selectedPhotoIndex < photos.length - 1 ? selectedPhotoIndex + 1 : 0)
-    }
-  }
-
-  const selectedPhoto = selectedPhotoIndex !== null ? photos[selectedPhotoIndex] : null
 
   return (
     <>
@@ -80,46 +86,82 @@ export default function PhotoGallery() {
           <p className="text-gray-600 font-medium">Cliquez sur les photos pour les agrandir et mieux identifier Tao</p>
         </CardHeader>
         <CardContent>
-          {/* Photo principale en grand */}
-          <div className="text-center mb-6">
-            <div className="relative group cursor-pointer" onClick={() => openPhoto(1)}>
-              <Image
-                src="/tao-garden.jpg"
-                alt="Tao - Photo principale"
-                width={256}
-                height={256}
-                className="rounded-2xl object-cover border-3 border-orange-300 shadow-lg mx-auto group-hover:shadow-xl transition-shadow"
-                priority
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-2xl transition-all flex items-center justify-center">
-                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
+          {/* Carousel principal */}
+          <div className="mb-6">
+            <Carousel 
+              setApi={setApi} 
+              className="w-full max-w-sm mx-auto"
+              opts={{
+                align: "center",
+                loop: true
+              }}
+            >
+              <CarouselContent>
+                {photos.map((photo, index) => (
+                  <CarouselItem key={`main-${photo.src}`}>
+                    <div className="relative group cursor-pointer" onClick={() => openPhoto(index)}>
+                      <Image
+                        src={photo.src}
+                        alt={photo.alt}
+                        width={320}
+                        height={320}
+                        className="w-full aspect-square rounded-2xl object-cover border-3 border-orange-300 shadow-lg group-hover:shadow-xl transition-shadow"
+                        priority={index === 0}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-2xl transition-all flex items-center justify-center">
+                        <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="-left-6 md:-left-8 bg-white/80 hover:bg-white border-orange-200 h-10 w-10" />
+              <CarouselNext className="-right-6 md:-right-8 bg-white/80 hover:bg-white border-orange-200 h-10 w-10" />
+            </Carousel>
+            
+            {/* Photo counter */}
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600 font-semibold">
+                Photo {current} sur {count} - <span className="hidden sm:inline">Cliquez pour agrandir</span><span className="sm:hidden">Touchez pour agrandir</span> !
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                <span className="hidden sm:inline">Utilisez les flèches ou glissez</span><span className="sm:hidden">Glissez</span> pour naviguer
+              </p>
             </div>
-            <p className="text-sm text-gray-600 mt-2 font-semibold">
-              Photo principale - Cliquez pour agrandir et voir les détails !
-            </p>
           </div>
 
-          {/* Galerie des autres photos */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[0, 2, 3, 4].map((photoIndex, gridIndex) => (
-              <div key={gridIndex} className="text-center">
-                <div className="relative group cursor-pointer" onClick={() => openPhoto(photoIndex)}>
-                  <Image
-                    src={photos[photoIndex].src || "/placeholder.svg"}
-                    alt={photos[photoIndex].alt}
-                    width={150}
-                    height={150}
-                    className="w-full aspect-square object-cover rounded-xl border-2 border-orange-200 shadow-md group-hover:shadow-lg transition-shadow"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-xl transition-all flex items-center justify-center">
-                    <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-600 mt-2 font-medium leading-tight">{photos[photoIndex].caption}</p>
-              </div>
-            ))}
+          {/* Thumbnails carousel */}
+          <div className="mt-4">
+            <Carousel 
+              className="w-full max-w-md mx-auto"
+              opts={{
+                align: "start",
+                dragFree: true
+              }}
+            >
+              <CarouselContent className="-ml-2">
+                {photos.map((photo, index) => (
+                  <CarouselItem key={`thumb-${photo.src}`} className="pl-2 basis-1/3 md:basis-1/4">
+                    <div className="text-center">
+                      <div className="relative group cursor-pointer" onClick={() => openPhoto(index)}>
+                        <Image
+                          src={photo.src}
+                          alt={photo.alt}
+                          width={100}
+                          height={100}
+                          className="w-full aspect-square object-cover rounded-xl border-2 border-orange-200 shadow-md group-hover:shadow-lg transition-shadow"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-xl transition-all flex items-center justify-center">
+                          <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1 font-medium leading-tight truncate">{photo.caption}</p>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
           </div>
 
           <div className="mt-6 bg-orange-100 border border-orange-300 rounded-lg p-4">
@@ -157,7 +199,7 @@ export default function PhotoGallery() {
         </CardContent>
       </Card>
 
-      {/* Photo Zoom Dialog */}
+      {/* Photo Zoom Dialog avec Carousel */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl w-full p-0 bg-black/95 border-none">
           <div className="relative">
@@ -171,58 +213,54 @@ export default function PhotoGallery() {
               <X className="w-6 h-6" />
             </Button>
 
-            {/* Navigation buttons */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 bg-white/20 hover:bg-white/30 text-white rounded-full"
-              onClick={() => navigatePhoto("prev")}
+            {/* Carousel pour les photos en grand */}
+            <Carousel 
+              className="w-full" 
+              opts={{ 
+                startIndex: selectedPhotoIndex || 0,
+                loop: true,
+                dragFree: false
+              }}
             >
-              <ChevronLeft className="w-6 h-6" />
-            </Button>
+              <CarouselContent>
+                {photos.map((photo, index) => (
+                  <CarouselItem key={`modal-${photo.src}`}>
+                    <div className="flex flex-col">
+                      <div className="relative">
+                        <Image
+                          src={photo.src}
+                          alt={photo.alt}
+                          width={800}
+                          height={600}
+                          className="w-full max-h-[70vh] object-contain"
+                          priority={index === selectedPhotoIndex}
+                        />
+                      </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 bg-white/20 hover:bg-white/30 text-white rounded-full"
-              onClick={() => navigatePhoto("next")}
-            >
-              <ChevronRight className="w-6 h-6" />
-            </Button>
+                      {/* Photo info */}
+                      <div className="bg-white p-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">{photo.caption}</h3>
+                        <p className="text-gray-600 mb-4">{photo.description}</p>
 
-            {/* Photo and details */}
-            {selectedPhoto && (
-              <div className="flex flex-col">
-                <div className="relative">
-                  <Image
-                    src={selectedPhoto.src || "/placeholder.svg"}
-                    alt={selectedPhoto.alt}
-                    width={800}
-                    height={600}
-                    className="w-full max-h-[70vh] object-contain"
-                    priority
-                  />
-                </div>
-
-                {/* Photo info */}
-                <div className="bg-white p-6">
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">{selectedPhoto.caption}</h3>
-                  <p className="text-gray-600 mb-4">{selectedPhoto.description}</p>
-
-                  {/* Photo counter */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">
-                      Photo {(selectedPhotoIndex || 0) + 1} sur {photos.length}
-                    </span>
-                    <div className="flex gap-2">
-                      <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-                        Cliquez et faites glisser pour naviguer
-                      </span>
+                        {/* Photo counter */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-500">
+                            Photo {index + 1} sur {photos.length}
+                          </span>
+                          <div className="flex gap-2">
+                            <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
+                              Glissez ou utilisez les flèches pour naviguer
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            )}
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-4 bg-white/20 hover:bg-white/30 text-white border-white/20" />
+              <CarouselNext className="right-4 bg-white/20 hover:bg-white/30 text-white border-white/20" />
+            </Carousel>
           </div>
         </DialogContent>
       </Dialog>

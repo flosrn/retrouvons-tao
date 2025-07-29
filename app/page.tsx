@@ -1,43 +1,31 @@
-"use client"
-
-import { Phone, Camera, Heart, Share2, AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import TaoHeroImage from "@/components/tao-hero-image"
+import { Card, CardContent } from "@/components/ui/card"
+import { AlertCircle, Camera, Heart } from "lucide-react"
 import dynamic from "next/dynamic"
 
+// Import direct des composants qui peuvent être SSR
+import RewardSection from "@/components/reward-section"
+import TipsSection from "@/components/tips-section"
+import PhotoGallery from "@/components/photo-gallery"
+
+// Seuls les composants nécessitant des APIs browser restent dynamiques
+const ClientActions = dynamic(() => import("@/components/client-actions"), {
+  loading: () => (
+    <div className="space-y-4">
+      <div className="w-full h-14 bg-gray-200 animate-pulse rounded-xl" />
+      <div className="w-full h-10 bg-gray-200 animate-pulse rounded" />
+    </div>
+  ),
+})
+
+// Le formulaire peut aussi être chargé de manière dynamique pour les performances
 const ReportForm = dynamic(() => import("@/components/report-form"), {
   loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
 })
-const PhotoGallery = dynamic(() => import("@/components/photo-gallery"), {
-  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
-})
-const RewardSection = dynamic(() => import("@/components/reward-section"))
-const TipsSection = dynamic(() => import("@/components/tips-section"))
 
 export default function FindTaoPage() {
   const phoneNumber = "06 24 04 61 95"
   const shareText = "Aidez-nous à retrouver Tao, chat perdu à Toulouse ! 500€ de récompense"
-  const shareUrl = typeof window !== "undefined" ? window.location.href : ""
-
-  const handleCall = () => {
-    window.location.href = `tel:${phoneNumber.replace(/\s/g, "")}`
-  }
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: "Chat perdu - Tao - Toulouse",
-        text: shareText,
-        url: shareUrl,
-      })
-    } else {
-      // Fallback pour les navigateurs qui ne supportent pas l'API Share
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`
-      window.open(whatsappUrl, "_blank")
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-amber-50">
@@ -91,14 +79,7 @@ export default function FindTaoPage() {
               <p className="text-sm text-gray-600 mb-3">
                 <strong>Vous l'avez vu ? Appelez immédiatement !</strong>
               </p>
-              <Button
-                onClick={handleCall}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-bold rounded-xl shadow-lg"
-                size="lg"
-              >
-                <Phone className="w-6 h-6 mr-3" />
-                {phoneNumber}
-              </Button>
+              <ClientActions phoneNumber={phoneNumber} shareText={shareText} />
             </CardContent>
           </Card>
 
@@ -135,15 +116,6 @@ export default function FindTaoPage() {
             <p className="text-sm text-gray-600 mb-4">
               Transmettez ce site à vos amis du quartier, chaque info compte !
             </p>
-
-            <Button
-              onClick={handleShare}
-              variant="outline"
-              className="border-orange-300 text-orange-600 hover:bg-orange-50 bg-transparent"
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Partager ce site
-            </Button>
           </div>
         </div>
       </div>

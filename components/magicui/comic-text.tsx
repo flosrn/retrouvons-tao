@@ -43,6 +43,7 @@ export function ComicText({
         backgroundClip: "text",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
+        letterSpacing: "0.05em",
         ...style,
       }}
       initial={{ opacity: 0, scale: 0.8, rotate: -2 }}

@@ -1,14 +1,13 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import { Camera, MapPin, User, Phone, Send, CheckCircle } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Camera, CheckCircle, MapPin, MessageCircle, Phone, Send, User } from "lucide-react"
+import type React from "react"
+import { useState } from "react"
 
 export default function ReportForm() {
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -58,8 +57,8 @@ export default function ReportForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Upload Photo */}
       <div>
-        <Label htmlFor="photo" className="text-base font-semibold text-gray-700 mb-2 block">
-          <Camera className="w-5 h-5 inline mr-2 text-orange-600" />
+        <Label htmlFor="photo" className="text-base font-semibold text-gray-700 mb-2 block text-left">
+          <Camera className="w-5 h-5 inline mr-2 text-orange-600 " />
           Photo du chat vu <span className="text-red-500">*</span>
         </Label>
         <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center bg-orange-50">
@@ -84,17 +83,17 @@ export default function ReportForm() {
 
       {/* Localisation */}
       <div>
-        <Label htmlFor="location" className="text-base font-semibold text-gray-700 mb-2 block">
+        <Label htmlFor="location" className="text-base font-semibold text-gray-700 mb-2 block text-left">
           <MapPin className="w-5 h-5 inline mr-2 text-orange-600" />
           Où l'avez-vous vu ? <span className="text-red-500">*</span>
         </Label>
         <Input
           id="location"
           type="text"
-          placeholder="Ex: Rue du Taur, Place du Capitole, Jardin des Plantes..."
+          placeholder="Ex: chemin des Clautasses"
           value={formData.location}
           onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
-          className="text-base py-3"
+          className="text-sm py-3"
           required
         />
       </div>
@@ -102,7 +101,7 @@ export default function ReportForm() {
       {/* Contact */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="name" className="text-base font-semibold text-gray-700 mb-2 block">
+          <Label htmlFor="name" className="text-base font-semibold text-gray-700 mb-2 block text-left">
             <User className="w-5 h-5 inline mr-2 text-orange-600" />
             Votre nom <span className="text-red-500">*</span>
           </Label>
@@ -112,13 +111,13 @@ export default function ReportForm() {
             placeholder="Prénom Nom"
             value={formData.name}
             onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            className="text-base py-3"
+            className="text-sm py-3"
             required
           />
         </div>
 
         <div>
-          <Label htmlFor="contact" className="text-base font-semibold text-gray-700 mb-2 block">
+          <Label htmlFor="contact" className="text-base font-semibold text-gray-700 mb-2 block text-left">
             <Phone className="w-5 h-5 inline mr-2 text-orange-600" />
             Téléphone <span className="text-red-500">*</span>
           </Label>
@@ -128,7 +127,7 @@ export default function ReportForm() {
             placeholder="06 12 34 56 78"
             value={formData.contact}
             onChange={(e) => setFormData((prev) => ({ ...prev, contact: e.target.value }))}
-            className="text-base py-3"
+            className="text-sm py-3"
             required
           />
         </div>
@@ -136,7 +135,8 @@ export default function ReportForm() {
 
       {/* Message */}
       <div>
-        <Label htmlFor="message" className="text-base font-semibold text-gray-700 mb-2 block">
+        <Label htmlFor="message" className="text-base font-semibold text-gray-700 mb-2 block text-left">
+          <MessageCircle className="w-5 h-5 inline mr-2 text-orange-600" />
           Détails utiles
         </Label>
         <Textarea
@@ -144,7 +144,7 @@ export default function ReportForm() {
           placeholder="Racontez ce que vous avez vu : comportement du chat, heure, circonstances..."
           value={formData.message}
           onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-          className="text-base min-h-[100px]"
+          className="text-sm min-h-[100px]"
           rows={4}
         />
       </div>

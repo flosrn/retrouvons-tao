@@ -34,11 +34,11 @@ export default function TipsSection() {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {tips.map((tip, index) => (
-            <div key={index} className="flex items-start gap-3 bg-white rounded-lg p-4 border border-green-200">
+            <div key={index} className="flex items-start gap-3 bg-white rounded-lg p-4 border border-gray-200">
               <div className="flex-shrink-0 mt-1">{tip.icon}</div>
               <div>
-                <h4 className="font-semibold text-gray-800 mb-1">{tip.title}</h4>
-                <p className="text-sm text-gray-600">{tip.description}</p>
+                <h4 className="font-semibold text-gray-800 mb-1 text-left">{tip.title}</h4>
+                <p className="text-sm text-gray-600 text-left">{tip.description}</p>
               </div>
             </div>
           ))}
@@ -48,8 +48,8 @@ export default function TipsSection() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
             <div>
-              <h4 className="font-semibold text-red-800 mb-2">⚠️ Important à retenir</h4>
-              <p className="text-sm text-red-700">
+              <h4 className="font-semibold text-red-800 mb-2 text-left">Important à retenir</h4>
+              <p className="text-sm text-red-700 text-left">
                 Tao est <strong>doux, câlin et curieux</strong> mais devient{" "}
                 <strong>très craintif avec les inconnus</strong> par stress. Ses{" "}
                 <strong>oreilles recourbées vers l'arrière</strong> sont son signe le plus distinctif.
@@ -63,11 +63,11 @@ export default function TipsSection() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
             <div>
-              <h4 className="font-semibold text-yellow-800 mb-2">🔍 Où chercher Tao ?</h4>
-              <p className="text-sm text-yellow-700 mb-3">
+              <h4 className="font-semibold text-yellow-800 mb-2 text-left">Où chercher Tao ?</h4>
+              <p className="text-sm text-yellow-700 mb-3 text-left">
                 Tao peut se cacher dans des endroits sombres et protégés. <strong>Vérifiez minutieusement :</strong>
               </p>
-              <ul className="text-sm text-yellow-700 space-y-1 ml-4">
+              <ul className="text-sm text-yellow-700 space-y-1 ml-4 text-left">
                 <li>
                   • <strong>Garages, caves, abris de jardin</strong> (même fermés, il peut s'y faufiler)
                 </li>

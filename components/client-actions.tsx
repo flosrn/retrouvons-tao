@@ -51,7 +51,7 @@ export default function ClientActions({ phoneNumber, shareText }: ClientActionsP
     <div className="space-y-4">
       <Button
         onClick={handleCall}
-        className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-bold rounded-xl shadow-lg"
+        className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-bold"
         size="lg"
       >
         <Phone className="w-6 h-6 mr-3" />
@@ -61,7 +61,7 @@ export default function ClientActions({ phoneNumber, shareText }: ClientActionsP
       <Button
         onClick={handleShare}
         variant="outline"
-        className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 bg-transparent"
+        className="w-full border-orange-300 text-orange-600 bg-orange-50"
       >
         <Share2 className="w-4 h-4 mr-2" />
         Partager ce site

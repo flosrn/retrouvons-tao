@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Carousel, type CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Camera, X, ZoomIn, Play, Pause } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
+import { Camera, Play, X, ZoomIn } from "lucide-react"
 import Image from "next/image"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export default function PhotoGallery() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null)
@@ -15,8 +15,12 @@ export default function PhotoGallery() {
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
   const carouselVideoRefs = useRef<(HTMLVideoElement | null)[]>([])
-  const modalVideoRef = useRef<HTMLVideoElement>(null)
+  const modalVideoRefs = useRef<(HTMLVideoElement | null)[]>([])
+  const [modalApi, setModalApi] = useState<CarouselApi>()
+  const [modalCurrentIndex, setModalCurrentIndex] = useState(0)
+  const [modalCount, setModalCount] = useState(0)
 
   const media = [
     {
@@ -83,7 +87,46 @@ export default function PhotoGallery() {
       // Auto-play video when it comes into view
       handleVideoAutoplay(currentIndex)
     })
+
+    // Enable autoplay after first user interaction
+    const enableAutoplay = () => {
+      setHasUserInteracted(true)
+    }
+    
+    document.addEventListener('click', enableAutoplay, { once: true })
+    document.addEventListener('touchstart', enableAutoplay, { once: true })
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('click', enableAutoplay)
+      document.removeEventListener('touchstart', enableAutoplay)
+    }
   }, [api])
+
+  // Modal carousel state and autoplay
+  useEffect(() => {
+    if (!modalApi) {
+      return
+    }
+
+    setModalCount(modalApi.scrollSnapList().length)
+    setModalCurrentIndex(modalApi.selectedScrollSnap())
+
+    modalApi.on("select", () => {
+      const currentIndex = modalApi.selectedScrollSnap()
+      setModalCurrentIndex(currentIndex)
+      handleModalVideoAutoplay(currentIndex)
+    })
+
+    // Auto-play video when modal opens on a video
+    const initialIndex = selectedPhotoIndex || 0
+    setModalCurrentIndex(initialIndex)
+    handleModalVideoAutoplay(initialIndex)
+    
+    return () => {
+      modalApi.off("select")
+    }
+  }, [modalApi, selectedPhotoIndex])
 
   const handleVideoAutoplay = (currentIndex: number) => {
     // Pause all carousel videos first
@@ -96,12 +139,67 @@ export default function PhotoGallery() {
 
     // Play current video if it's a video
     const currentMedia = media[currentIndex]
+    
     if (currentMedia?.type === "video" && carouselVideoRefs.current[currentIndex]) {
       const video = carouselVideoRefs.current[currentIndex]
+      
       if (video) {
-        video.play().catch(() => {
-          // Autoplay failed (browser policy), that's ok
-        })
+        // Wait for video to be ready
+        const attemptPlay = () => {
+          if (video.readyState >= 3) { // HAVE_FUTURE_DATA or better
+            // Only attempt autoplay if user has interacted or video is muted
+            if (hasUserInteracted || video.muted) {
+              video.play().catch(() => {
+                // Autoplay failed (browser policy), that's ok
+              })
+            }
+          } else {
+            // Wait a bit more for video to load
+            setTimeout(attemptPlay, 100)
+          }
+        }
+        
+        // Reset video to start and attempt autoplay
+        video.currentTime = 0
+        attemptPlay()
+      }
+    }
+  }
+
+  const handleModalVideoAutoplay = (currentIndex: number) => {
+    // Pause all modal videos first
+    modalVideoRefs.current.forEach((video, index) => {
+      if (video && index !== currentIndex) {
+        video.pause()
+        video.currentTime = 0
+      }
+    })
+
+    // Play current video if it's a video
+    const currentMedia = media[currentIndex]
+    
+    if (currentMedia?.type === "video" && modalVideoRefs.current[currentIndex]) {
+      const video = modalVideoRefs.current[currentIndex]
+      
+      if (video) {
+        // Wait for video to be ready
+        const attemptPlay = () => {
+          if (video.readyState >= 3) { // HAVE_FUTURE_DATA or better
+            // Only attempt autoplay if user has interacted or video is muted
+            if (hasUserInteracted || video.muted) {
+              video.play().catch(() => {
+                // Autoplay failed (browser policy), that's ok
+              })
+            }
+          } else {
+            // Wait a bit more for video to load
+            setTimeout(attemptPlay, 100)
+          }
+        }
+        
+        // Reset video to start and attempt autoplay
+        video.currentTime = 0
+        attemptPlay()
       }
     }
   }
@@ -109,41 +207,51 @@ export default function PhotoGallery() {
   const openPhoto = (index: number) => {
     setSelectedPhotoIndex(index)
     setIsDialogOpen(true)
+    
+    // Auto-trigger video autoplay when modal opens on video slide
+    if (media[index]?.type === "video") {
+      // Give more time for modal and carousel to fully render
+      setTimeout(() => {
+        handleModalVideoAutoplay(index)
+      }, 500)
+    }
   }
 
   const closePhoto = () => {
     setIsDialogOpen(false)
     setSelectedPhotoIndex(null)
-    // Pause video when closing
-    if (modalVideoRef.current) {
-      modalVideoRef.current.pause()
-      setIsVideoPlaying(false)
-    }
+    // Pause all modal videos when closing
+    modalVideoRefs.current.forEach((video) => {
+      if (video) {
+        video.pause()
+        video.currentTime = 0
+      }
+    })
+    setIsVideoPlaying(false)
   }
 
-  const toggleVideo = () => {
-    if (modalVideoRef.current) {
-      if (isVideoPlaying) {
-        modalVideoRef.current.pause()
-      } else {
-        modalVideoRef.current.play()
-      }
-      setIsVideoPlaying(!isVideoPlaying)
-    }
-  }
 
   const renderMediaItem = (item: typeof media[0], index: number, isModal = false) => {
     if (item.type === "video") {
       return (
-        <div className="relative group">
+        <div className="relative group w-full h-full">
           <video
-            ref={isModal ? modalVideoRef : (el) => {
+            ref={isModal ? (el) => {
+              if (modalVideoRefs.current) {
+                modalVideoRefs.current[index] = el
+              }
+            } : (el) => {
               if (carouselVideoRefs.current) {
                 carouselVideoRefs.current[index] = el
               }
             }}
+            src={item.src}
             poster={item.poster}
-            className={`w-full ${isModal ? 'h-[70vh] object-cover' : 'aspect-square object-cover'} rounded-2xl ${isModal ? '' : 'border-3 border-orange-300 shadow-lg group-hover:shadow-xl transition-shadow'}`}
+            className={`${
+              isModal 
+                ? 'w-full h-full object-contain shadow-xl' 
+                : 'w-full aspect-square object-cover rounded-3xl border-3 border-orange-300 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105'
+            }`}
             controls={isModal}
             preload="metadata"
             playsInline
@@ -157,8 +265,8 @@ export default function PhotoGallery() {
             Votre navigateur ne supporte pas les vidéos.
           </video>
           {!isModal && (
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-2xl transition-all flex items-center justify-center">
-              <div className="bg-orange-600 rounded-full p-3 opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-3xl transition-all duration-300 flex items-center justify-center">
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-full p-4 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200 shadow-lg">
                 <Play className="w-6 h-6 text-white fill-current" />
               </div>
             </div>
@@ -167,18 +275,26 @@ export default function PhotoGallery() {
       )
     } else {
       return (
-        <div className="relative group">
+        <div className="relative group w-full h-full">
           <Image
             src={item.src}
             alt={item.alt}
             width={isModal ? 800 : 320}
             height={isModal ? 600 : 320}
-            className={`w-full object-cover rounded-2xl ${isModal ? 'max-h-[70vh] object-contain' : 'aspect-square border-3 border-orange-300 shadow-lg group-hover:shadow-xl transition-shadow'}`}
-            priority={index === 0}
+            className={`${
+              isModal 
+                ? 'w-full h-full object-contain shadow-xl' 
+                : 'w-full aspect-square object-cover rounded-3xl border-3 border-orange-300 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105'
+            }`}
+            priority={isModal || index === 0}
           />
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-2xl transition-all flex items-center justify-center">
-            <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
+          {!isModal && (
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-3xl transition-all duration-300 flex items-center justify-center">
+              <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200 shadow-lg">
+                <ZoomIn className="w-8 h-8 text-gray-700" />
+              </div>
+            </div>
+          )}
         </div>
       )
     }
@@ -209,14 +325,21 @@ export default function PhotoGallery() {
               <CarouselContent>
                 {media.map((item, index) => (
                   <CarouselItem key={`main-${item.src}`}>
-                    <div className="cursor-pointer" onClick={() => openPhoto(index)}>
+                    <div 
+                      className="cursor-pointer" 
+                      onClick={() => openPhoto(index)}
+                      onKeyDown={(e) => e.key === 'Enter' && openPhoto(index)}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Ouvrir ${item.type === 'video' ? 'la vidéo' : 'la photo'} : ${item.caption}`}
+                    >
                       {renderMediaItem(item, index, false)}
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="-left-6 md:-left-8 bg-white/80 hover:bg-white border-orange-200 h-10 w-10" />
-              <CarouselNext className="-right-6 md:-right-8 bg-white/80 hover:bg-white border-orange-200 h-10 w-10" />
+              <CarouselPrevious className="-left-6 md:-left-8 rounded-full bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:bg-white hover:scale-110 transition-all duration-200 h-10 w-10" />
+              <CarouselNext className="-right-6 md:-right-8 rounded-full bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:bg-white hover:scale-110 transition-all duration-200 h-10 w-10" />
             </Carousel>
             
             {/* Photo counter */}
@@ -243,7 +366,14 @@ export default function PhotoGallery() {
                 {media.map((item, index) => (
                   <CarouselItem key={`thumb-${item.src}`} className="pl-2 basis-1/3 md:basis-1/4">
                     <div className="text-center">
-                      <div className="relative group cursor-pointer" onClick={() => openPhoto(index)}>
+                      <div 
+                        className="relative group cursor-pointer" 
+                        onClick={() => openPhoto(index)}
+                        onKeyDown={(e) => e.key === 'Enter' && openPhoto(index)}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Ouvrir ${item.type === 'video' ? 'la vidéo' : 'la photo'} : ${item.caption}`}
+                      >
                         {item.type === "video" ? (
                           <div className="relative">
                             <Image
@@ -319,79 +449,71 @@ export default function PhotoGallery() {
         </CardContent>
       </Card>
 
-      {/* Photo Zoom Dialog avec Carousel */}
+      {/* Modal avec CSS Grid - Design playful avec arrondis */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl w-full p-0 bg-black/95 border-none">
-          <DialogTitle className="sr-only">
-            {selectedPhotoIndex !== null && media[selectedPhotoIndex] ? 
-              `${media[selectedPhotoIndex].type === "video" ? "Vidéo" : "Photo"} - ${media[selectedPhotoIndex].caption}` : 
-              "Aperçu média"}
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            {selectedPhotoIndex !== null && media[selectedPhotoIndex] ? 
-              media[selectedPhotoIndex].description : 
-              "Visualisation des médias pour identifier Tao"}
-          </DialogDescription>
-          <div className="relative">
-            {/* Close button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-4 right-4 z-50 bg-white/20 hover:bg-white/30 text-white rounded-full"
-              onClick={closePhoto}
-            >
-              <X className="w-6 h-6" />
-            </Button>
-
-            {/* Carousel pour les photos en grand */}
-            <Carousel 
-              className="w-full" 
-              opts={{ 
-                startIndex: selectedPhotoIndex || 0,
-                loop: true,
-                dragFree: false
-              }}
-            >
-              <CarouselContent>
-                {media.map((item, index) => (
-                  <CarouselItem key={`modal-${item.src}`}>
-                    <div className="flex flex-col">
-                      <div className="relative">
-                        {renderMediaItem(item, index, true)}
-                      </div>
-
-                      {/* Media info */}
-                      <div className="bg-white p-6">
-                        <h3 className="text-xl font-bold text-gray-800 mb-2">
-                          {item.type === "video" && (
-                            <span className="inline-flex items-center mr-2 text-orange-600">
-                              <Play className="w-5 h-5 mr-1" />
-                              Vidéo
-                            </span>
-                          )}
-                          {item.caption}
-                        </h3>
-                        <p className="text-gray-600 mb-4">{item.description}</p>
-
-                        {/* Media counter */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500">
-                            {item.type === "video" ? "Vidéo" : "Photo"} {index + 1} sur {media.length}
-                          </span>
-                          <div className="flex gap-2">
-                            <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-                              Glissez ou utilisez les flèches pour naviguer
-                            </span>
-                          </div>
+        <DialogContent className="sm:max-w-4xl w-full max-w-[95vw] h-[90vh] p-0 gap-0 rounded-3xl overflow-hidden shadow-2xl">
+          {/* Structure CSS Grid avec hauteurs fixes garanties */}
+          <div 
+            className="h-full grid grid-rows-[auto_1fr_auto] bg-white"
+            style={{ 
+              gridTemplateRows: '120px 1fr 80px' // Hauteurs fixes GARANTIES
+            }}
+          >
+            {/* Header - hauteur fixe 120px avec arrondis supérieurs */}
+            <div className="p-6 pb-4 bg-gradient-to-b from-white to-gray-50 overflow-hidden rounded-t-3xl">
+              <DialogTitle className="text-lg font-semibold mb-1 line-clamp-1 text-gray-800">
+                {modalCurrentIndex < media.length ? 
+                  `${media[modalCurrentIndex].type === "video" ? "Vidéo" : "Photo"} - ${media[modalCurrentIndex].caption}` : 
+                  "Aperçu média"}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-gray-600 line-clamp-2">
+                {modalCurrentIndex < media.length ? 
+                  media[modalCurrentIndex].description : 
+                  "Visualisation des médias pour identifier Tao"}
+              </DialogDescription>
+            </div>
+            
+            {/* Zone média - avec arrondis intérieurs playful et overflow contrôlé */}
+            <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden m-4 rounded-2xl">
+              {/* Container avec arrondis garantis pour les médias */}
+              <div className="absolute inset-0 rounded-2xl overflow-hidden">
+                <Carousel 
+                  setApi={setModalApi}
+                  className="w-full h-full rounded-2xl" 
+                  opts={{ 
+                    startIndex: selectedPhotoIndex || 0,
+                    loop: true
+                  }}
+                >
+                  <CarouselContent className="h-full">
+                    {media.map((item, index) => (
+                      <CarouselItem key={`modal-${item.src}-${index}`} className="h-full">
+                        <div className="h-full flex items-center justify-center p-1">
+                          {renderMediaItem(item, index, true)}
                         </div>
-                      </div>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="left-4 bg-white/20 hover:bg-white/30 text-white border-white/20" />
-              <CarouselNext className="right-4 bg-white/20 hover:bg-white/30 text-white border-white/20" />
-            </Carousel>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  
+                  {/* Navigation avec boutons arrondis playful - style uniforme */}
+                  <CarouselPrevious className="left-4 rounded-full bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:bg-white hover:scale-110 transition-all duration-200" />
+                  <CarouselNext className="right-4 rounded-full bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:bg-white hover:scale-110 transition-all duration-200" />
+                </Carousel>
+              </div>
+            </div>
+            
+            {/* Footer - hauteur fixe avec arrondis inférieurs */}
+            <div className="p-4 bg-gradient-to-t from-white to-gray-50 flex items-center justify-center rounded-b-3xl">
+              <div className="text-center bg-white/60 backdrop-blur-sm px-4 py-2 rounded-2xl">
+                <p className="text-lg font-medium text-gray-800">
+                  {media[modalCurrentIndex]?.type === "video" ? "📹" : "📸"} 
+                  {modalCurrentIndex + 1} sur {media.length}
+                </p>
+                <p className="text-sm text-gray-600 mt-1 line-clamp-1">
+                  {media[modalCurrentIndex]?.caption}
+                </p>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -3,7 +3,16 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bangers:wght@400&display=swap&subset=latin');
+
+/* Force Bangers font loading pour iOS */
+@font-face {
+  font-family: 'Bangers-Fallback';
+  src: url('https://fonts.gstatic.com/s/bangers/v24/FeVQS0BTqb0h60ACL5la2bxe.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
 
 @layer utilities {
   .text-balance {

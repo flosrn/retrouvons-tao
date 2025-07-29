@@ -28,7 +28,7 @@ export function ComicText({
       className={cn("select-none text-center", className)}
       style={{
         fontSize: `${fontSize}rem`,
-        fontFamily: "'Bangers', 'Comic Sans MS', 'Impact', sans-serif",
+        fontFamily: "'Bangers', 'Bangers-Fallback', 'Comic Sans MS', 'Impact', sans-serif",
         fontWeight: "900",
         WebkitTextStroke: `${fontSize * 0.35}px #000000`, // Thick black outline
         transform: "skewX(-10deg)",

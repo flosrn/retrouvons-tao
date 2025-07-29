@@ -1,13 +1,19 @@
 "use client"
 
-export default function TaoHeroImage() {
+import Image from "next/image"
+import React from "react"
+
+const TaoHeroImage = React.memo(function TaoHeroImage() {
   return (
     <>
       {/* Fallback image for accessibility and SEO */}
-      <img
+      <Image
         src="/tao-transparent.png"
         alt="Tao, chat perdu - Chat tigré aux pattes blanches"
+        width={320}
+        height={340}
         className="sr-only"
+        priority
       />
       
       {/* SVG with 3D pop-out effect */}
@@ -122,4 +128,6 @@ export default function TaoHeroImage() {
       `}</style>
     </>
   )
-}
+})
+
+export default TaoHeroImage

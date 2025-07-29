@@ -4,11 +4,17 @@ import { Phone, Camera, Heart, Share2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import ReportForm from "@/components/report-form"
-import PhotoGallery from "@/components/photo-gallery"
-import RewardSection from "@/components/reward-section"
-import TipsSection from "@/components/tips-section"
 import TaoHeroImage from "@/components/tao-hero-image"
+import dynamic from "next/dynamic"
+
+const ReportForm = dynamic(() => import("@/components/report-form"), {
+  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
+})
+const PhotoGallery = dynamic(() => import("@/components/photo-gallery"), {
+  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />,
+})
+const RewardSection = dynamic(() => import("@/components/reward-section"))
+const TipsSection = dynamic(() => import("@/components/tips-section"))
 
 export default function FindTaoPage() {
   const phoneNumber = "06 24 04 61 95"
@@ -28,7 +34,7 @@ export default function FindTaoPage() {
       })
     } else {
       // Fallback pour les navigateurs qui ne supportent pas l'API Share
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`
       window.open(whatsappUrl, "_blank")
     }
   }

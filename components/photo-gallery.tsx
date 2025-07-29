@@ -5,6 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Camera, X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
 import { useState } from "react"
+import Image from "next/image"
 
 export default function PhotoGallery() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null)
@@ -82,10 +83,13 @@ export default function PhotoGallery() {
           {/* Photo principale en grand */}
           <div className="text-center mb-6">
             <div className="relative group cursor-pointer" onClick={() => openPhoto(1)}>
-              <img
+              <Image
                 src="/tao-garden.jpg"
                 alt="Tao - Photo principale"
-                className="w-64 h-64 rounded-2xl object-cover border-3 border-orange-300 shadow-lg mx-auto group-hover:shadow-xl transition-shadow"
+                width={256}
+                height={256}
+                className="rounded-2xl object-cover border-3 border-orange-300 shadow-lg mx-auto group-hover:shadow-xl transition-shadow"
+                priority
               />
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-2xl transition-all flex items-center justify-center">
                 <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -101,10 +105,13 @@ export default function PhotoGallery() {
             {[0, 2, 3, 4].map((photoIndex, gridIndex) => (
               <div key={gridIndex} className="text-center">
                 <div className="relative group cursor-pointer" onClick={() => openPhoto(photoIndex)}>
-                  <img
+                  <Image
                     src={photos[photoIndex].src || "/placeholder.svg"}
                     alt={photos[photoIndex].alt}
+                    width={150}
+                    height={150}
                     className="w-full aspect-square object-cover rounded-xl border-2 border-orange-200 shadow-md group-hover:shadow-lg transition-shadow"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-xl transition-all flex items-center justify-center">
                     <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -187,10 +194,13 @@ export default function PhotoGallery() {
             {selectedPhoto && (
               <div className="flex flex-col">
                 <div className="relative">
-                  <img
+                  <Image
                     src={selectedPhoto.src || "/placeholder.svg"}
                     alt={selectedPhoto.alt}
+                    width={800}
+                    height={600}
                     className="w-full max-h-[70vh] object-contain"
+                    priority
                   />
                 </div>
 

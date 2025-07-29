@@ -1,6 +1,8 @@
-import PhotoGallery from "@/components/photo-gallery";
 import { AlertCircle, Heart, MessageCircle } from "lucide-react";
 import dynamic from "next/dynamic";
+import { AuroraText } from "@/components/magicui/aurora-text";
+import { ComicText } from "@/components/magicui/comic-text";
+import PhotoGallery from "@/components/photo-gallery";
 // Import direct des composants qui peuvent être SSR
 import RewardSection from "@/components/reward-section";
 import TaoHeroImage from "@/components/tao-hero-image";
@@ -73,9 +75,9 @@ export default function FindTaoPage() {
             </div>
 
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 leading-tight">
-              Aidez-nous à retrouver{" "}
-              <span className="text-orange-600 font-bold">Tao</span>
+              Aidez-nous à retrouver
               <br />
+              <ComicText fontSize={3}>Tao</ComicText>
               <span className="text-lg md:text-2xl text-gray-800">
                 sa famille est très triste
               </span>

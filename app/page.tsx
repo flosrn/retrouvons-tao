@@ -47,15 +47,26 @@ export default function FindTaoPage() {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         {/* Hero Section */}
         <div className="text-center mb-8">
-          <div className="relative inline-block mb-6">
+          <div className="relative inline-block mb-4">
             <TaoHeroImage />
-            <Badge className="absolute -top-2 -right-2 bg-red-500 text-white px-3 py-1 text-sm font-bold shadow-lg z-50">
-              PERDU
-            </Badge>
+            <div className="absolute top-6 -right-16 z-50">
+              <div className="relative">
+                <div className="bg-white rounded-full px-4 py-2 shadow-lg border-2 border-orange-400">
+                  <p className="text-sm font-medium text-orange-600">Miaou ! Je suis perdu 😿</p>
+                </div>
+                {/* Petite queue de bulle */}
+                <div className="absolute -bottom-2 left-12 w-0 h-0
+                  border-l-[8px] border-l-transparent
+                  border-t-[10px] border-t-white
+                  border-r-[8px] border-r-transparent
+                  rotate-[127deg]">
+                </div>
+              </div>
+            </div>
           </div>
 
           <h1 className="text-3xl font-bold text-gray-800 mb-3">
-            Aidez-nous à retrouver Tao,
+            Aidez-nous à retrouver <span className="bg-gradient-to-r from-red-500 via-fuchsia-500 to-orange-500 bg-clip-text text-transparent font-extrabold">Tao</span>,
             <br />
             <span className="text-orange-600">chat perdu à Toulouse !</span>
           </h1>
@@ -63,7 +74,9 @@ export default function FindTaoPage() {
           <p className="text-lg text-gray-600 mb-6 leading-relaxed">
             Disparu au <strong>46 chemin de la Bourdette, 31400 Toulouse</strong>
             <br />
-            Quartier <strong>Ramonville/Pouvourville</strong> - Chat mâle pucé, oreilles recourbées très distinctives
+            Quartier <strong>Ramonville/Pouvourville</strong>
+            <br />
+            Chat mâle pucé, oreilles recourbées très distinctives
           </p>
 
           {/* CTA Principal - Appel */}

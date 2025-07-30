@@ -8,9 +8,94 @@ import { Textarea } from "@/components/ui/textarea"
 import { UploadButton } from "@/lib/uploadthing"
 import { Camera, CheckCircle, MapPin, MessageCircle, Phone, Send, User } from "lucide-react"
 import type React from "react"
-import { useState } from "react"
+import { useState, useCallback, memo } from "react"
 
-export default function ReportForm() {
+// Success message component - memoized for performance
+const SuccessMessage = memo(() => (
+  <Card className="bg-green-50 border-green-200">
+    <CardContent className="p-6 text-center">
+      <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+      <h3 className="text-xl font-bold text-green-800 mb-2">Merci pour votre signalement !</h3>
+      <p className="text-green-700 mb-4">
+        Nous avons bien reçu votre message. Nous vous contacterons rapidement pour vérifier les informations.
+      </p>
+      <p className="text-sm text-green-600">Si c'est bien Tao, la récompense de 500€ vous sera remise !</p>
+    </CardContent>
+  </Card>
+));
+
+SuccessMessage.displayName = 'SuccessMessage';
+
+// Photo upload component - memoized for performance
+const PhotoUploadSection = memo(({ formData, setFormData }: {
+  formData: any;
+  setFormData: React.Dispatch<React.SetStateAction<any>>;
+}) => {
+  const handlePhotoUpload = useCallback((res: any) => {
+    if (res && res[0]) {
+      setFormData((prev: any) => ({ 
+        ...prev, 
+        photoUrl: res[0].url,
+        photoName: res[0].name
+      }))
+    }
+  }, [setFormData]);
+
+  const clearPhoto = useCallback(() => {
+    setFormData((prev: any) => ({ ...prev, photoUrl: "", photoName: "" }));
+  }, [setFormData]);
+
+  if (formData.photoUrl) {
+    return (
+      <div className="border-2 border-green-300 rounded-lg p-4 bg-green-50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
+            <div>
+              <p className="text-green-700 font-medium">Photo uploadée avec succès !</p>
+              <p className="text-sm text-green-600">{formData.photoName}</p>
+            </div>
+          </div>
+          <img 
+            src={formData.photoUrl} 
+            alt="Photo uploadée" 
+            className="w-16 h-16 object-cover rounded-lg"
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-2 text-orange-600 border-orange-300 hover:bg-orange-50"
+          onClick={clearPhoto}
+        >
+          Changer la photo
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center bg-orange-50">
+      <Camera className="w-12 h-12 text-orange-400 mx-auto mb-2" />
+      <p className="text-gray-600 font-medium mb-2">
+        Uploadez une photo du chat
+      </p>
+      <UploadButton
+        endpoint="imageUploader"
+        onClientUploadComplete={handlePhotoUpload}
+        onUploadError={(error: Error) => {
+          alert(`Erreur lors de l'upload: ${error.message}`)
+        }}
+      />
+      <p className="text-sm text-gray-500 mt-2">Photo obligatoire pour valider le signalement</p>
+    </div>
+  );
+});
+
+PhotoUploadSection.displayName = 'PhotoUploadSection';
+
+function ReportForm() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [formData, setFormData] = useState({
     photoUrl: "",
@@ -21,7 +106,7 @@ export default function ReportForm() {
     message: "",
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Validate that photo is uploaded
@@ -60,31 +145,27 @@ export default function ReportForm() {
       console.error('Erreur lors de l\'envoi:', error)
       alert(`Erreur lors de l'envoi du signalement: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
     }
-  }
+  }, [formData])
 
-  const handlePhotoUpload = (res: any) => {
-    if (res && res[0]) {
-      setFormData((prev) => ({ 
-        ...prev, 
-        photoUrl: res[0].url,
-        photoName: res[0].name
-      }))
-    }
-  }
+  // Form field change handlers - memoized for performance
+  const handleLocationChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, location: e.target.value }));
+  }, []);
+
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, name: e.target.value }));
+  }, []);
+
+  const handleContactChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, contact: e.target.value }));
+  }, []);
+
+  const handleMessageChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFormData((prev) => ({ ...prev, message: e.target.value }));
+  }, []);
 
   if (isSubmitted) {
-    return (
-      <Card className="bg-green-50 border-green-200">
-        <CardContent className="p-6 text-center">
-          <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-green-800 mb-2">Merci pour votre signalement !</h3>
-          <p className="text-green-700 mb-4">
-            Nous avons bien reçu votre message. Nous vous contacterons rapidement pour vérifier les informations.
-          </p>
-          <p className="text-sm text-green-600">Si c'est bien Tao, la récompense de 500€ vous sera remise !</p>
-        </CardContent>
-      </Card>
-    )
+    return <SuccessMessage />;
   }
 
   return (
@@ -95,49 +176,7 @@ export default function ReportForm() {
           <Camera className="w-5 h-5 inline mr-2 text-orange-600 " />
           Photo du chat vu <span className="text-red-500">*</span>
         </Label>
-        
-        {formData.photoUrl ? (
-          <div className="border-2 border-green-300 rounded-lg p-4 bg-green-50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
-                <div>
-                  <p className="text-green-700 font-medium">Photo uploadée avec succès !</p>
-                  <p className="text-sm text-green-600">{formData.photoName}</p>
-                </div>
-              </div>
-              <img 
-                src={formData.photoUrl} 
-                alt="Photo uploadée" 
-                className="w-16 h-16 object-cover rounded-lg"
-              />
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-2 text-orange-600 border-orange-300 hover:bg-orange-50"
-              onClick={() => setFormData(prev => ({ ...prev, photoUrl: "", photoName: "" }))}
-            >
-              Changer la photo
-            </Button>
-          </div>
-        ) : (
-          <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center bg-orange-50">
-            <Camera className="w-12 h-12 text-orange-400 mx-auto mb-2" />
-            <p className="text-gray-600 font-medium mb-2">
-              Uploadez une photo du chat
-            </p>
-            <UploadButton
-              endpoint="imageUploader"
-              onClientUploadComplete={handlePhotoUpload}
-              onUploadError={(error: Error) => {
-                alert(`Erreur lors de l'upload: ${error.message}`)
-              }}
-            />
-            <p className="text-sm text-gray-500 mt-2">Photo obligatoire pour valider le signalement</p>
-          </div>
-        )}
+        <PhotoUploadSection formData={formData} setFormData={setFormData} />
       </div>
 
       {/* Localisation */}
@@ -151,7 +190,7 @@ export default function ReportForm() {
           type="text"
           placeholder="Ex: chemin des Clautasses"
           value={formData.location}
-          onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+          onChange={handleLocationChange}
           className="text-sm py-3"
           required
         />
@@ -169,7 +208,7 @@ export default function ReportForm() {
             type="text"
             placeholder="Prénom Nom"
             value={formData.name}
-            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+            onChange={handleNameChange}
             className="text-sm py-3"
             required
           />
@@ -185,7 +224,7 @@ export default function ReportForm() {
             type="tel"
             placeholder="06 12 34 56 78"
             value={formData.contact}
-            onChange={(e) => setFormData((prev) => ({ ...prev, contact: e.target.value }))}
+            onChange={handleContactChange}
             className="text-sm py-3"
             required
           />
@@ -202,7 +241,7 @@ export default function ReportForm() {
           id="message"
           placeholder="Racontez ce que vous avez vu : comportement du chat, heure, circonstances..."
           value={formData.message}
-          onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
+          onChange={handleMessageChange}
           className="text-sm min-h-[100px]"
           rows={4}
         />
@@ -228,3 +267,5 @@ export default function ReportForm() {
     </form>
   )
 }
+
+export default memo(ReportForm);

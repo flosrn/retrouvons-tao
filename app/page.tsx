@@ -1,25 +1,75 @@
 import { AlertCircle, Heart, MessageCircle } from "lucide-react";
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import { ComicText } from "@/components/magicui/comic-text";
-import PhotoGallery from "@/components/photo-gallery";
-import RewardSection from "@/components/reward-section";
 import TaoHeroImage from "@/components/tao-hero-image";
-import TipsSection from "@/components/tips-section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Seuls les composants nécessitant des APIs browser restent dynamiques
+// Mobile-optimized layout
+const MobileOptimizedLayout = dynamic(() => import("@/components/mobile-optimized-layout"));
+
+// Lazy loading des composants lourds avec des skeletons optimisés
+const PhotoGallery = dynamic(() => import("@/components/photo-gallery"), {
+  loading: () => (
+    <Card className="mb-8 bg-white border-gray-200">
+      <CardHeader className="text-center pb-4">
+        <div className="h-6 bg-gray-200 rounded mx-auto w-48 animate-pulse" />
+      </CardHeader>
+      <CardContent>
+        <div className="mb-8 relative">
+          <div className="bg-gray-200 rounded-3xl p-4 h-80 animate-pulse" />
+        </div>
+        <div className="mt-4 flex gap-2 justify-center">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="w-16 h-16 bg-gray-200 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  ),
+});
+
+const RewardSection = dynamic(() => import("@/components/reward-section"), {
+  loading: () => (
+    <Card className="mb-8">
+      <CardContent className="p-8">
+        <div className="h-32 bg-gray-200 rounded animate-pulse" />
+      </CardContent>
+    </Card>
+  ),
+});
+
+const TipsSection = dynamic(() => import("@/components/tips-section"), {
+  loading: () => (
+    <Card className="mb-8">
+      <CardContent className="p-8">
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-16 bg-gray-200 rounded animate-pulse" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  ),
+});
+
+// Composants critiques chargés de manière optimisée
 const ClientActions = dynamic(() => import("@/components/client-actions"), {
   loading: () => (
     <div className="space-y-4">
-      <div className="w-full h-14 bg-gray-200 rounded" />
-      <div className="w-full h-10 bg-gray-200 rounded" />
+      <div className="w-full h-14 bg-gray-200 rounded-xl animate-pulse" />
+      <div className="w-full h-10 bg-gray-200 rounded animate-pulse" />
     </div>
   ),
 });
 
-// Le formulaire peut aussi être chargé de manière dynamique pour les performances
+// Formulaire chargé avec Intersection Observer pour lazy loading
 const ReportForm = dynamic(() => import("@/components/report-form"), {
-  loading: () => <div className="h-96 bg-gray-100 rounded-lg" />,
+  loading: () => (
+    <div className="h-96 bg-gray-100 rounded-lg animate-pulse flex items-center justify-center">
+      <div className="text-gray-500">Chargement du formulaire...</div>
+    </div>
+  ),
 });
 
 export default function FindTaoPage() {
@@ -28,15 +78,15 @@ export default function FindTaoPage() {
     "Aidez-nous à retrouver Tao, chat perdu à Toulouse ! 500€ de récompense";
 
   return (
-    <div className="min-h-screen bg-orange-100">
-      {/* Badge récompense fixe en haut avec animation */}
-      <div className="sticky top-0 z-50 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 text-white py-4 px-4 text-center shadow-lg">
-        <div className="flex items-center justify-center gap-3">
-          <AlertCircle className="w-6 h-6" />
-          <span className="font-black text-xl tracking-wide">
+    <MobileOptimizedLayout className="bg-orange-100">
+      {/* Badge récompense fixe en haut avec animation - Mobile optimized */}
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 text-white py-3 sm:py-4 px-4 text-center shadow-lg sticky-header">
+        <div className="flex items-center justify-center gap-2 sm:gap-3">
+          <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+          <span className="font-black text-lg sm:text-xl tracking-wide truncate">
             500 € DE RÉCOMPENSE
           </span>
-          <AlertCircle className="w-6 h-6" />
+          <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
         </div>
       </div>
 
@@ -119,8 +169,19 @@ export default function FindTaoPage() {
             </CardContent>
           </Card>
 
-          {/* Galerie Photos - Déplacée en haut pour visibilité */}
-          <PhotoGallery />
+          {/* Galerie Photos - Chargement prioritaire */}
+          <Suspense fallback={
+            <Card className="mb-8 bg-white border-gray-200">
+              <CardHeader className="text-center pb-4">
+                <div className="h-6 bg-gray-200 rounded mx-auto w-48 animate-pulse" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-80 bg-gray-200 rounded-3xl animate-pulse" />
+              </CardContent>
+            </Card>
+          }>
+            <PhotoGallery />
+          </Suspense>
 
           {/* Section Formulaire de Signalement */}
           <Card className="mb-8 border-gray-200">
@@ -131,15 +192,41 @@ export default function FindTaoPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <ReportForm />
+              <Suspense fallback={
+                <div className="h-96 bg-gray-100 rounded-lg animate-pulse flex items-center justify-center">
+                  <div className="text-gray-500">Chargement du formulaire...</div>
+                </div>
+              }>
+                <ReportForm />
+              </Suspense>
             </CardContent>
           </Card>
 
-          {/* Section Récompense */}
-          <RewardSection />
+          {/* Section Récompense - Lazy loaded */}
+          <Suspense fallback={
+            <Card className="mb-8">
+              <CardContent className="p-8">
+                <div className="h-32 bg-gray-200 rounded animate-pulse" />
+              </CardContent>
+            </Card>
+          }>
+            <RewardSection />
+          </Suspense>
 
-          {/* Conseils */}
-          <TipsSection />
+          {/* Conseils - Lazy loaded */}
+          <Suspense fallback={
+            <Card className="mb-8">
+              <CardContent className="p-8">
+                <div className="space-y-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-16 bg-gray-200 rounded animate-pulse" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          }>
+            <TipsSection />
+          </Suspense>
 
           {/* Footer */}
           <div className="text-center pt-8 border-t border-orange-200 mt-8">
@@ -156,6 +243,6 @@ export default function FindTaoPage() {
           </div>
         </div>
       </div>
-    </div>
+    </MobileOptimizedLayout>
   );
 }

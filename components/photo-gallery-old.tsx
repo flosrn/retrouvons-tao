@@ -17,181 +17,12 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, Play } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
+import { useEffect, useRef, useState } from "react";
 
-// Memoized media configuration to prevent re-creation on each render
-const mediaConfig = [
-  {
-    src: "/tao-garden.jpg",
-    type: "image" as const,
-    alt: "Tao dans l'herbe",
-    caption: "Dans l'herbe - profil montrant les oreilles et la robe tigrée",
-    description:
-      "Tao dans son environnement extérieur. Notez la robe gris tigré sur les côtés et les oreilles distinctives.",
-  },
-  {
-    src: "/tao-video-web.mp4",
-    type: "video" as const,
-    poster: "/tao-video-thumbnail.png",
-    alt: "Tao en mouvement",
-    caption: "Vidéo de Tao - comportement et mouvement naturels",
-    description:
-      "Vidéo montrant Tao en mouvement, permettant de voir son comportement naturel et ses caractéristiques distinctives.",
-  },
-  {
-    src: "/tao-main.jpg",
-    type: "image" as const,
-    alt: "Tao de face",
-    caption: "Vue de face - oreilles recourbées très distinctives",
-    description:
-      "Photo principale montrant clairement les oreilles recourbées vers l'arrière, caractéristique unique de Tao.",
-  },
-  {
-    src: "/tao-chair.jpg",
-    type: "image" as const,
-    alt: "Tao sur fauteuil",
-    caption: "Sur fauteuil - vue trois-quarts, caractère doux et câlin",
-    description:
-      "Tao montrant son côté doux et câlin. Vue parfaite pour identifier ses traits faciaux.",
-  },
-  {
-    src: "/tao-desk.jpg",
-    type: "image" as const,
-    alt: "Tao sur meuble",
-    caption: "Perché sur meuble - côté curieux et joueur",
-    description:
-      "Tao perché, montrant son caractère curieux et joueur. Oreilles bien visibles.",
-  },
-  {
-    src: "/tao-box.jpg",
-    type: "image" as const,
-    alt: "Tao dans boîte",
-    caption: "Dans une boîte - aime se cacher dans des espaces confinés",
-    description:
-      "Tao dans une boîte en carton, illustrant parfaitement qu'il aime se cacher dans des espaces confinés.",
-  },
-];
-
-// Memoized video component for performance
-const VideoComponent = memo(({ item, index, isModal, onPlay, onPause, videoRef }: {
-  item: typeof mediaConfig[0];
-  index: number;
-  isModal: boolean;
-  onPlay: () => void;
-  onPause: () => void;
-  videoRef: (el: HTMLVideoElement | null) => void;
-}) => (
-  <video
-    ref={videoRef}
-    src={item.src}
-    poster={item.poster}
-    className={`${
-      isModal
-        ? "max-w-full max-h-full w-auto h-auto object-contain shadow-xl rounded-lg"
-        : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
-    }`}
-    controls={isModal}
-    preload="metadata"
-    playsInline
-    webkit-playsinline="true"
-    muted={!isModal}
-    onPlay={onPlay}
-    onPause={onPause}
-  >
-    <source src={item.src} type="video/mp4" />
-    <source src={item.src} type="video/quicktime" />
-    Votre navigateur ne supporte pas les vidéos.
-  </video>
-));
-
-VideoComponent.displayName = 'VideoComponent';
-
-// Memoized image component for performance
-const ImageComponent = memo(({ item, index, isModal }: {
-  item: typeof mediaConfig[0];
-  index: number;
-  isModal: boolean;
-}) => (
-  <Image
-    src={item.src}
-    alt={item.alt}
-    width={isModal ? 800 : 320}
-    height={isModal ? 600 : 320}
-    className={`${
-      isModal
-        ? "max-w-full max-h-full w-auto h-auto object-contain shadow-xl rounded-lg"
-        : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
-    }`}
-    priority={isModal || index === 0}
-    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-  />
-));
-
-ImageComponent.displayName = 'ImageComponent';
-
-// Memoized thumbnail component for performance
-const ThumbnailComponent = memo(({ item, index, onOpen }: {
-  item: typeof mediaConfig[0];
-  index: number;
-  onOpen: (index: number) => void;
-}) => {
-  const handleClick = useCallback(() => onOpen(index), [index, onOpen]);
-  
-  return (
-    <CarouselItem
-      key={`thumb-${item.src}`}
-      className="pl-2 basis-1/3 md:basis-1/4"
-    >
-      <div className="text-center">
-        <div
-          className="relative group cursor-pointer"
-          onClick={handleClick}
-          onKeyDown={(e) => e.key === "Enter" && handleClick()}
-          tabIndex={0}
-          role="button"
-          aria-label={`Ouvrir ${
-            item.type === "video" ? "la vidéo" : "la photo"
-          } : ${item.caption}`}
-        >
-          {item.type === "video" ? (
-            <div className="relative">
-              <Image
-                src={item.poster || "/tao-main.jpg"}
-                alt={item.alt}
-                width={100}
-                height={100}
-                className="w-full aspect-square object-cover rounded-lg border border-gray-200"
-                loading="lazy"
-              />
-              <div className="absolute bottom-1 right-1">
-                <div className="bg-orange-600 rounded-full p-1">
-                  <Play className="w-3 h-3 text-white fill-current" />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <Image
-              src={item.src}
-              alt={item.alt}
-              width={100}
-              height={100}
-              className="w-full aspect-square object-cover rounded-lg border border-gray-200"
-              loading="lazy"
-            />
-          )}
-        </div>
-        <p className="text-xs text-gray-600 mt-1 font-medium leading-tight truncate">
-          {item.caption}
-        </p>
-      </div>
-    </CarouselItem>
+export default function PhotoGallery() {
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
+    null
   );
-});
-
-ThumbnailComponent.displayName = 'ThumbnailComponent';
-
-function PhotoGallery() {
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -204,11 +35,115 @@ function PhotoGallery() {
   const [modalCurrentIndex, setModalCurrentIndex] = useState(0);
   const [modalCount, setModalCount] = useState(0);
 
-  // Use stable reference to media config
-  const media = useMemo(() => mediaConfig, []);
+  const media = [
+    {
+      src: "/tao-garden.jpg",
+      type: "image",
+      alt: "Tao dans l'herbe",
+      caption: "Dans l'herbe - profil montrant les oreilles et la robe tigrée",
+      description:
+        "Tao dans son environnement extérieur. Notez la robe gris tigré sur les côtés et les oreilles distinctives.",
+    },
+    {
+      src: "/tao-video-web.mp4",
+      type: "video",
+      poster: "/tao-video-thumbnail.png", // Image de preview optimized
+      alt: "Tao en mouvement",
+      caption: "Vidéo de Tao - comportement et mouvement naturels",
+      description:
+        "Vidéo montrant Tao en mouvement, permettant de voir son comportement naturel et ses caractéristiques distinctives.",
+    },
+    {
+      src: "/tao-main.jpg",
+      type: "image",
+      alt: "Tao de face",
+      caption: "Vue de face - oreilles recourbées très distinctives",
+      description:
+        "Photo principale montrant clairement les oreilles recourbées vers l'arrière, caractéristique unique de Tao.",
+    },
+    {
+      src: "/tao-chair.jpg",
+      type: "image",
+      alt: "Tao sur fauteuil",
+      caption: "Sur fauteuil - vue trois-quarts, caractère doux et câlin",
+      description:
+        "Tao montrant son côté doux et câlin. Vue parfaite pour identifier ses traits faciaux.",
+    },
+    {
+      src: "/tao-desk.jpg",
+      type: "image",
+      alt: "Tao sur meuble",
+      caption: "Perché sur meuble - côté curieux et joueur",
+      description:
+        "Tao perché, montrant son caractère curieux et joueur. Oreilles bien visibles.",
+    },
+    {
+      src: "/tao-box.jpg",
+      type: "image",
+      alt: "Tao dans boîte",
+      caption: "Dans une boîte - aime se cacher dans des espaces confinés",
+      description:
+        "Tao dans une boîte en carton, illustrant parfaitement qu'il aime se cacher dans des espaces confinés.",
+    },
+  ];
 
-  // Memoized callbacks for video autoplay
-  const handleVideoAutoplay = useCallback((currentIndex: number) => {
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      const currentIndex = api.selectedScrollSnap();
+      setCurrent(currentIndex + 1);
+
+      // Auto-play video when it comes into view
+      handleVideoAutoplay(currentIndex);
+    });
+
+    // Enable autoplay after first user interaction
+    const enableAutoplay = () => {
+      setHasUserInteracted(true);
+    };
+
+    document.addEventListener("click", enableAutoplay, { once: true });
+    document.addEventListener("touchstart", enableAutoplay, { once: true });
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("click", enableAutoplay);
+      document.removeEventListener("touchstart", enableAutoplay);
+    };
+  }, [api]);
+
+  // Modal carousel state and autoplay
+  useEffect(() => {
+    if (!modalApi) {
+      return;
+    }
+
+    setModalCount(modalApi.scrollSnapList().length);
+    setModalCurrentIndex(modalApi.selectedScrollSnap());
+
+    modalApi.on("select", () => {
+      const currentIndex = modalApi.selectedScrollSnap();
+      setModalCurrentIndex(currentIndex);
+      handleModalVideoAutoplay(currentIndex);
+    });
+
+    // Auto-play video when modal opens on a video
+    const initialIndex = selectedPhotoIndex || 0;
+    setModalCurrentIndex(initialIndex);
+    handleModalVideoAutoplay(initialIndex);
+
+    return () => {
+      modalApi.off("select");
+    };
+  }, [modalApi, selectedPhotoIndex]);
+
+  const handleVideoAutoplay = (currentIndex: number) => {
     // Pause all carousel videos first
     carouselVideoRefs.current.forEach((video, index) => {
       if (video && index !== currentIndex) {
@@ -248,9 +183,9 @@ function PhotoGallery() {
         attemptPlay();
       }
     }
-  }, [hasUserInteracted, media]);
+  };
 
-  const handleModalVideoAutoplay = useCallback((currentIndex: number) => {
+  const handleModalVideoAutoplay = (currentIndex: number) => {
     // Pause all modal videos first
     modalVideoRefs.current.forEach((video, index) => {
       if (video && index !== currentIndex) {
@@ -290,9 +225,9 @@ function PhotoGallery() {
         attemptPlay();
       }
     }
-  }, [hasUserInteracted, media]);
+  };
 
-  const openPhoto = useCallback((index: number) => {
+  const openPhoto = (index: number) => {
     setSelectedPhotoIndex(index);
     setIsDialogOpen(true);
 
@@ -303,9 +238,9 @@ function PhotoGallery() {
         handleModalVideoAutoplay(index);
       }, 500);
     }
-  }, [media, handleModalVideoAutoplay]);
+  };
 
-  const closePhoto = useCallback(() => {
+  const closePhoto = () => {
     setIsDialogOpen(false);
     setSelectedPhotoIndex(null);
     // Pause all modal videos when closing
@@ -316,101 +251,70 @@ function PhotoGallery() {
       }
     });
     setIsVideoPlaying(false);
-  }, []);
+  };
 
-  const renderMediaItem = useCallback((
+  const renderMediaItem = (
     item: (typeof media)[0],
     index: number,
     isModal = false
   ) => {
     if (item.type === "video") {
       return (
-        <VideoComponent
-          item={item}
-          index={index}
-          isModal={isModal}
-          onPlay={() => setIsVideoPlaying(true)}
-          onPause={() => setIsVideoPlaying(false)}
-          videoRef={isModal
-            ? (el) => {
-                if (modalVideoRefs.current) {
-                  modalVideoRefs.current[index] = el;
-                }
-              }
-            : (el) => {
-                if (carouselVideoRefs.current) {
-                  carouselVideoRefs.current[index] = el;
-                }
-              }
-          }
-        />
+        <div className="relative group w-full h-full">
+          <video
+            ref={
+              isModal
+                ? (el) => {
+                    if (modalVideoRefs.current) {
+                      modalVideoRefs.current[index] = el;
+                    }
+                  }
+                : (el) => {
+                    if (carouselVideoRefs.current) {
+                      carouselVideoRefs.current[index] = el;
+                    }
+                  }
+            }
+            src={item.src}
+            poster={item.poster}
+            className={`${
+              isModal
+                ? "w-full h-full object-contain shadow-xl"
+                : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
+            }`}
+            controls={isModal}
+            preload="metadata"
+            playsInline
+            webkit-playsinline="true"
+            muted={!isModal}
+            onPlay={() => setIsVideoPlaying(true)}
+            onPause={() => setIsVideoPlaying(false)}
+          >
+            <source src={item.src} type="video/mp4" />
+            <source src={item.src} type="video/quicktime" />
+            Votre navigateur ne supporte pas les vidéos.
+          </video>
+        </div>
       );
     } else {
       return (
-        <ImageComponent
-          item={item}
-          index={index}
-          isModal={isModal}
-        />
+        <div className="relative group w-full h-full">
+          <Image
+            src={item.src}
+            alt={item.alt}
+            width={isModal ? 800 : 320}
+            height={isModal ? 600 : 320}
+            className={`${
+              isModal
+                ? "w-full h-full object-contain shadow-xl"
+                : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
+            }`}
+            priority={isModal || index === 0}
+          />
+        </div>
       );
     }
-  }, [media]);
-
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
-
-    api.on("select", () => {
-      const currentIndex = api.selectedScrollSnap();
-      setCurrent(currentIndex + 1);
-
-      // Auto-play video when it comes into view
-      handleVideoAutoplay(currentIndex);
-    });
-
-    // Enable autoplay after first user interaction
-    const enableAutoplay = () => {
-      setHasUserInteracted(true);
-    };
-
-    document.addEventListener("click", enableAutoplay, { once: true });
-    document.addEventListener("touchstart", enableAutoplay, { once: true });
-
-    // Cleanup
-    return () => {
-      document.removeEventListener("click", enableAutoplay);
-      document.removeEventListener("touchstart", enableAutoplay);
-    };
-  }, [api, handleVideoAutoplay]);
-
-  // Modal carousel state and autoplay
-  useEffect(() => {
-    if (!modalApi) {
-      return;
-    }
-
-    setModalCount(modalApi.scrollSnapList().length);
-    setModalCurrentIndex(modalApi.selectedScrollSnap());
-
-    modalApi.on("select", () => {
-      const currentIndex = modalApi.selectedScrollSnap();
-      setModalCurrentIndex(currentIndex);
-      handleModalVideoAutoplay(currentIndex);
-    });
-
-    // Auto-play video when modal opens on a video
-    const initialIndex = selectedPhotoIndex || 0;
-    setModalCurrentIndex(initialIndex);
-    handleModalVideoAutoplay(initialIndex);
-
-    return () => {
-      modalApi.off("select");
-    };
-  }, [modalApi, selectedPhotoIndex, handleModalVideoAutoplay]);
+  };
 
   return (
     <>
@@ -509,12 +413,53 @@ function PhotoGallery() {
             >
               <CarouselContent className="-ml-2">
                 {media.map((item, index) => (
-                  <ThumbnailComponent
+                  <CarouselItem
                     key={`thumb-${item.src}`}
-                    item={item}
-                    index={index}
-                    onOpen={openPhoto}
-                  />
+                    className="pl-2 basis-1/3 md:basis-1/4"
+                  >
+                    <div className="text-center">
+                      <div
+                        className="relative group cursor-pointer"
+                        onClick={() => openPhoto(index)}
+                        onKeyDown={(e) => e.key === "Enter" && openPhoto(index)}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Ouvrir ${
+                          item.type === "video" ? "la vidéo" : "la photo"
+                        } : ${item.caption}`}
+                      >
+                        {item.type === "video" ? (
+                          <div className="relative">
+                            <Image
+                              src={item.poster || "/tao-main.jpg"}
+                              alt={item.alt}
+                              width={100}
+                              height={100}
+                              className="w-full aspect-square object-cover rounded-lg border border-gray-200"
+                              loading="lazy"
+                            />
+                            <div className="absolute bottom-1 right-1">
+                              <div className="bg-orange-600 rounded-full p-1">
+                                <Play className="w-3 h-3 text-white fill-current" />
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <Image
+                            src={item.src}
+                            alt={item.alt}
+                            width={100}
+                            height={100}
+                            className="w-full aspect-square object-cover rounded-lg border border-gray-200"
+                            loading="lazy"
+                          />
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1 font-medium leading-tight truncate">
+                        {item.caption}
+                      </p>
+                    </div>
+                  </CarouselItem>
                 ))}
               </CarouselContent>
             </Carousel>
@@ -656,9 +601,9 @@ function PhotoGallery() {
                     {media.map((item, index) => (
                       <CarouselItem
                         key={`modal-${item.src}-${index}`}
-                        className="h-full flex items-center justify-center"
+                        className="h-full"
                       >
-                        <div className="w-full h-full flex items-center justify-center p-2">
+                        <div className="h-full flex items-center justify-center p-1">
                           {renderMediaItem(item, index, true)}
                         </div>
                       </CarouselItem>
@@ -690,5 +635,3 @@ function PhotoGallery() {
     </>
   );
 }
-
-export default memo(PhotoGallery);

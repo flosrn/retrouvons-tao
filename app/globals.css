@@ -1,18 +1,22 @@
+@import "@uploadthing/react/styles.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 
-/* Font-face direct pour Bangers - solution iOS Safari */
 @font-face {
-  font-family: 'Bangers';
-  src: url('https://fonts.gstatic.com/s/bangers/v24/FeVQS0BTqb0h60ACL5la2bxe.woff2') format('woff2'),
-       url('https://fonts.gstatic.com/s/bangers/v24/FeVQS0BTqb0h60ACL5la2bxe.woff') format('woff');
+  font-family: "Bangers";
+  src: url("https://fonts.gstatic.com/s/bangers/v24/FeVQS0BTqb0h60ACL5la2bxe.woff2")
+      format("woff2"),
+    url("https://fonts.gstatic.com/s/bangers/v24/FeVQS0BTqb0h60ACL5la2bxe.woff")
+      format("woff");
   font-display: block; /* Important pour iOS avec backgroundClip */
   font-weight: 400;
   font-style: normal;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
 }
 
 /* Amélioration du rendu WebKit pour iOS */
@@ -63,11 +67,13 @@
 
   /* Enhanced shadows for depth */
   .shadow-empathy {
-    box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.1), 0 4px 6px -2px rgba(249, 115, 22, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.1),
+      0 4px 6px -2px rgba(249, 115, 22, 0.05);
   }
 
   .shadow-hope {
-    box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.1), 0 4px 6px -2px rgba(34, 197, 94, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.1),
+      0 4px 6px -2px rgba(34, 197, 94, 0.05);
   }
 
   /* Typography enhancements */
@@ -87,8 +93,13 @@
 }
 
 @keyframes gentle-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 @keyframes slide-up {
@@ -103,8 +114,13 @@
 }
 
 @keyframes gentle-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes fade-in-up {
@@ -205,33 +221,36 @@
 
 @theme inline {
   @keyframes shiny-text {
-  0%, 90%, 100% {
-    background-position: calc(-100% - var(--shiny-width)) 0;
+    0%,
+    90%,
+    100% {
+      background-position: calc(-100% - var(--shiny-width)) 0;
     }
-  30%, 60% {
-    background-position: calc(100% + var(--shiny-width)) 0;
+    30%,
+    60% {
+      background-position: calc(100% + var(--shiny-width)) 0;
     }
   }
   @keyframes aurora {
-  0% {
-    background-position: 0% 50%;
-    transform: rotate(-5deg) scale(0.9);
+    0% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
     }
-  25% {
-    background-position: 50% 100%;
-    transform: rotate(5deg) scale(1.1);
+    25% {
+      background-position: 50% 100%;
+      transform: rotate(5deg) scale(1.1);
     }
-  50% {
-    background-position: 100% 50%;
-    transform: rotate(-3deg) scale(0.95);
+    50% {
+      background-position: 100% 50%;
+      transform: rotate(-3deg) scale(0.95);
     }
-  75% {
-    background-position: 50% 0%;
-    transform: rotate(3deg) scale(1.05);
+    75% {
+      background-position: 50% 0%;
+      transform: rotate(3deg) scale(1.05);
     }
-  100% {
-    background-position: 0% 50%;
-    transform: rotate(-5deg) scale(0.9);
+    100% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
     }
   }
 }

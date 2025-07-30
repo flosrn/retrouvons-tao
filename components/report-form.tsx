@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { UploadButton } from "@/lib/uploadthing"
 import { Camera, CheckCircle, MapPin, MessageCircle, Phone, Send, User } from "lucide-react"
 import type React from "react"
 import { useState } from "react"
@@ -12,7 +13,8 @@ import { useState } from "react"
 export default function ReportForm() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [formData, setFormData] = useState({
-    photo: null as File | null,
+    photoUrl: "",
+    photoName: "",
     location: "",
     name: "",
     contact: "",
@@ -22,19 +24,51 @@ export default function ReportForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Simulation d'envoi (en réalité, vous intégreriez avec votre backend)
-    console.log("Signalement envoyé:", formData)
+    // Validate that photo is uploaded
+    if (!formData.photoUrl) {
+      alert('Veuillez d\'abord uploader une photo avant de soumettre le formulaire.')
+      return
+    }
 
-    // Simulation d'un délai d'envoi
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      // Submit to API with JSON data
+      const response = await fetch('/api/sightings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          contact: formData.contact,
+          location: formData.location,
+          message: formData.message,
+          photoUrl: formData.photoUrl,
+          photoName: formData.photoName,
+        }),
+      })
 
-    setIsSubmitted(true)
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de l\'envoi du signalement')
+      }
+
+      console.log("Signalement envoyé avec succès:", result)
+      setIsSubmitted(true)
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi:', error)
+      alert(`Erreur lors de l'envoi du signalement: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
+    }
   }
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setFormData((prev) => ({ ...prev, photo: file }))
+  const handlePhotoUpload = (res: any) => {
+    if (res && res[0]) {
+      setFormData((prev) => ({ 
+        ...prev, 
+        photoUrl: res[0].url,
+        photoName: res[0].name
+      }))
     }
   }
 
@@ -57,28 +91,53 @@ export default function ReportForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Upload Photo */}
       <div>
-        <Label htmlFor="photo" className="text-base font-semibold text-gray-700 mb-2 block text-left">
+        <Label className="text-base font-semibold text-gray-700 mb-2 block text-left">
           <Camera className="w-5 h-5 inline mr-2 text-orange-600 " />
           Photo du chat vu <span className="text-red-500">*</span>
         </Label>
-        <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center bg-orange-50">
-          <input
-            type="file"
-            id="photo"
-            accept="image/*"
-            capture="environment"
-            onChange={handlePhotoChange}
-            className="hidden"
-            required
-          />
-          <label htmlFor="photo" className="cursor-pointer">
+        
+        {formData.photoUrl ? (
+          <div className="border-2 border-green-300 rounded-lg p-4 bg-green-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
+                <div>
+                  <p className="text-green-700 font-medium">Photo uploadée avec succès !</p>
+                  <p className="text-sm text-green-600">{formData.photoName}</p>
+                </div>
+              </div>
+              <img 
+                src={formData.photoUrl} 
+                alt="Photo uploadée" 
+                className="w-16 h-16 object-cover rounded-lg"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2 text-orange-600 border-orange-300 hover:bg-orange-50"
+              onClick={() => setFormData(prev => ({ ...prev, photoUrl: "", photoName: "" }))}
+            >
+              Changer la photo
+            </Button>
+          </div>
+        ) : (
+          <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center bg-orange-50">
             <Camera className="w-12 h-12 text-orange-400 mx-auto mb-2" />
-            <p className="text-gray-600 font-medium">
-              {formData.photo ? formData.photo.name : "Touchez pour prendre une photo"}
+            <p className="text-gray-600 font-medium mb-2">
+              Uploadez une photo du chat
             </p>
-            <p className="text-sm text-gray-500 mt-1">Photo obligatoire pour valider le signalement</p>
-          </label>
-        </div>
+            <UploadButton
+              endpoint="imageUploader"
+              onClientUploadComplete={handlePhotoUpload}
+              onUploadError={(error: Error) => {
+                alert(`Erreur lors de l'upload: ${error.message}`)
+              }}
+            />
+            <p className="text-sm text-gray-500 mt-2">Photo obligatoire pour valider le signalement</p>
+          </div>
+        )}
       </div>
 
       {/* Localisation */}

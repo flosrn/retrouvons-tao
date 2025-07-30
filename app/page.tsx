@@ -1,9 +1,7 @@
 import { AlertCircle, Heart, MessageCircle } from "lucide-react";
 import dynamic from "next/dynamic";
-import { AuroraText } from "@/components/magicui/aurora-text";
 import { ComicText } from "@/components/magicui/comic-text";
 import PhotoGallery from "@/components/photo-gallery";
-// Import direct des composants qui peuvent être SSR
 import RewardSection from "@/components/reward-section";
 import TaoHeroImage from "@/components/tao-hero-image";
 import TipsSection from "@/components/tips-section";

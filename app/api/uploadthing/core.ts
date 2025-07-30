@@ -19,6 +19,12 @@ export const ourFileRouter = {
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
       // This code runs on your server before upload
+      // Check if UPLOADTHING_TOKEN is configured
+      if (!process.env.UPLOADTHING_TOKEN) {
+        console.error('UPLOADTHING_TOKEN not configured in environment variables');
+        throw new UploadThingError('Server configuration error');
+      }
+      
       // For now, we'll allow all uploads (no authentication required)
       // You can add authentication logic here later if needed
       

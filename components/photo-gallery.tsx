@@ -445,7 +445,7 @@ function PhotoGallery() {
     handleModalVideoAutoplay(initialIndex);
 
     return () => {
-      modalApi.off("select");
+      modalApi.off("select", () => {});
     };
   }, [modalApi, selectedPhotoIndex, handleModalVideoAutoplay]);
 

@@ -85,7 +85,17 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
         endpoint="imageUploader"
         onClientUploadComplete={handlePhotoUpload}
         onUploadError={(error: Error) => {
-          alert(`Erreur lors de l'upload: ${error.message}`)
+          console.error('Upload error details:', error);
+          let errorMessage = error.message;
+          
+          // Handle specific UploadThing errors
+          if (errorMessage.includes('Invalid token')) {
+            errorMessage = 'Erreur de configuration du service d\'upload. Veuillez réessayer ou nous contacter directement.';
+          } else if (errorMessage.includes('Network')) {
+            errorMessage = 'Problème de connexion. Vérifiez votre connexion internet et réessayez.';
+          }
+          
+          alert(`Erreur lors de l'upload: ${errorMessage}`);
         }}
       />
       <p className="text-sm text-gray-500 mt-2">Photo obligatoire pour valider le signalement</p>

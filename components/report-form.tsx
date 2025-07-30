@@ -113,8 +113,14 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
           uploadIcon: () => <Camera className="w-12 h-12" />,
           label: () => <span>Uploadez une photo du chat</span>,
           allowedContent: () => <span>Photo obligatoire pour valider le signalement</span>,
-          button: ({ ready, isUploading }) => {
+          button: ({ ready, isUploading, uploadProgress, files }) => {
+            if (isUploading && uploadProgress !== undefined) {
+              return `Upload ${uploadProgress}%`;
+            }
             if (isUploading) return "Upload en cours...";
+            if (files && files.length > 0) {
+              return `Uploader ${files.length > 1 ? `${files.length} photos` : 'la photo'}`;
+            }
             if (ready) return "Choisir une photo";
             return "Préparation...";
           }

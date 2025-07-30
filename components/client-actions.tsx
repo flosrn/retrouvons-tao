@@ -1,22 +1,25 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Phone, Share2 } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Phone, Share2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface ClientActionsProps {
-  phoneNumber: string
-  shareText: string
+  phoneNumber: string;
+  shareText: string;
 }
 
-export default function ClientActions({ phoneNumber, shareText }: ClientActionsProps) {
-  const [shareUrl, setShareUrl] = useState("")
-  const [mounted, setMounted] = useState(false)
+export default function ClientActions({
+  phoneNumber,
+  shareText,
+}: ClientActionsProps) {
+  const [shareUrl, setShareUrl] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-    setShareUrl(window.location.href)
-  }, [])
+    setMounted(true);
+    setShareUrl(window.location.href);
+  }, []);
 
   if (!mounted) {
     return (
@@ -26,12 +29,12 @@ export default function ClientActions({ phoneNumber, shareText }: ClientActionsP
         {/* Skeleton for share button */}
         <div className="w-full h-10 bg-gray-200 animate-pulse rounded" />
       </div>
-    )
+    );
   }
 
   const handleCall = () => {
-    window.location.href = `tel:${phoneNumber.replace(/\s/g, "")}`
-  }
+    window.location.href = `tel:${phoneNumber.replace(/\s/g, "")}`;
+  };
 
   const handleShare = () => {
     if (navigator.share) {
@@ -39,19 +42,21 @@ export default function ClientActions({ phoneNumber, shareText }: ClientActionsP
         title: "Chat perdu - Tao - Toulouse",
         text: shareText,
         url: shareUrl,
-      })
+      });
     } else {
       // Fallback pour les navigateurs qui ne supportent pas l'API Share
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`
-      window.open(whatsappUrl, "_blank")
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
+        `${shareText} ${shareUrl}`
+      )}`;
+      window.open(whatsappUrl, "_blank");
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       <Button
         onClick={handleCall}
-        className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-bold"
+        className="w-full bg-green-600 text-white py-4 text-xl font-bold"
         size="lg"
       >
         <Phone className="w-6 h-6 mr-3" />
@@ -67,5 +72,5 @@ export default function ClientActions({ phoneNumber, shareText }: ClientActionsP
         Partager ce site
       </Button>
     </div>
-  )
+  );
 }

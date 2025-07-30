@@ -27,7 +27,7 @@ export function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.uploadthing.com https://utfs.io",
+    "connect-src 'self' https://api.uploadthing.com https://utfs.io https://*.ingest.uploadthing.com https://sea1.ingest.uploadthing.com",
     "media-src 'self' https: data:",
     "object-src 'none'",
     "base-uri 'self'",

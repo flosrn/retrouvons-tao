@@ -94,7 +94,7 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
   }
 
   return (
-    <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 bg-orange-50">
+    <div className="border-2 border-dashed border-orange-300 rounded-lg p-8 bg-orange-50 text-center">
       <UploadDropzone
         endpoint="imageUploader"
         onClientUploadComplete={handlePhotoUpload}
@@ -103,11 +103,11 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
           console.log('Upload started');
         }}
         appearance={{
-          container: "w-full h-32 border-0 bg-transparent",
-          uploadIcon: "text-orange-400",
-          label: "text-gray-600 font-medium text-sm",
-          allowedContent: "text-gray-500 text-xs mt-1",
-          button: "bg-orange-600 hover:bg-orange-700 text-white rounded-md px-4 py-2 font-medium transition-colors ut-ready:bg-orange-600 ut-ready:text-white ut-uploading:bg-orange-400 ut-uploading:cursor-not-allowed ut-uploading:text-white"
+          container: "w-full h-auto border-0 bg-transparent p-0",
+          uploadIcon: "text-orange-500 mb-2",
+          label: "text-gray-700 font-medium text-base mb-1",
+          allowedContent: "text-gray-500 text-sm mb-4",
+          button: "!bg-orange-600 !text-white !rounded-lg !px-6 !py-3 !font-semibold !text-lg !border-0 hover:!bg-orange-700 !transition-all !duration-200 !cursor-pointer !shadow-md hover:!shadow-lg active:!scale-95 !min-h-[50px] !w-auto !inline-flex !items-center !justify-center"
         }}
         content={{
           uploadIcon: () => <Camera className="w-12 h-12" />,

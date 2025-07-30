@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, Play } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Memoized media configuration to prevent re-creation on each render
 const mediaConfig = [
@@ -29,22 +29,14 @@ const mediaConfig = [
     description:
       "Tao dans son environnement extérieur. Notez la robe gris tigré sur les côtés et les oreilles distinctives.",
   },
+
   {
-    src: "/tao-video-web.mp4",
-    type: "video" as const,
-    poster: "/tao-video-thumbnail.png",
-    alt: "Tao en mouvement",
-    caption: "Vidéo de Tao - comportement et mouvement naturels",
-    description:
-      "Vidéo montrant Tao en mouvement, permettant de voir son comportement naturel et ses caractéristiques distinctives.",
-  },
-  {
-    src: "/tao-main.jpg",
+    src: "/tao-profile.jpg",
     type: "image" as const,
-    alt: "Tao de face",
-    caption: "Vue de face - oreilles recourbées très distinctives",
+    alt: "Tao de profil",
+    caption: "Vue de profil - caractéristiques distinctives",
     description:
-      "Photo principale montrant clairement les oreilles recourbées vers l'arrière, caractéristique unique de Tao.",
+      "Vue de profil de Tao montrant ses caractéristiques uniques et son expression.",
   },
   {
     src: "/tao-chair.jpg",
@@ -70,128 +62,170 @@ const mediaConfig = [
     description:
       "Tao dans une boîte en carton, illustrant parfaitement qu'il aime se cacher dans des espaces confinés.",
   },
+  {
+    src: "/tao-main.jpg",
+    type: "image" as const,
+    alt: "Tao de face",
+    caption: "Vue de face - oreilles recourbées très distinctives",
+    description:
+      "Photo principale montrant clairement les oreilles recourbées vers l'arrière, caractéristique unique de Tao.",
+  },
+  {
+    src: "/tao-video-web.mp4",
+    type: "video" as const,
+    poster: "/tao-video-thumbnail.png",
+    alt: "Tao en mouvement",
+    caption: "Comportement et mouvement naturels",
+    description:
+      "Vidéo montrant Tao en mouvement, permettant de voir son comportement naturel et ses caractéristiques distinctives.",
+  },
 ];
 
 // Memoized video component for performance
-const VideoComponent = memo(({ item, index, isModal, onPlay, onPause, videoRef }: {
-  item: typeof mediaConfig[0];
-  index: number;
-  isModal: boolean;
-  onPlay: () => void;
-  onPause: () => void;
-  videoRef: (el: HTMLVideoElement | null) => void;
-}) => (
-  <video
-    ref={videoRef}
-    src={item.src}
-    poster={item.poster}
-    className={`${
-      isModal
-        ? "max-w-full max-h-full w-auto h-auto object-contain shadow-xl rounded-lg"
-        : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
-    }`}
-    controls={isModal}
-    preload="metadata"
-    playsInline
-    webkit-playsinline="true"
-    muted={!isModal}
-    onPlay={onPlay}
-    onPause={onPause}
-  >
-    <source src={item.src} type="video/mp4" />
-    <source src={item.src} type="video/quicktime" />
-    Votre navigateur ne supporte pas les vidéos.
-  </video>
-));
+const VideoComponent = memo(
+  ({
+    item,
+    index,
+    isModal,
+    onPlay,
+    onPause,
+    videoRef,
+  }: {
+    item: (typeof mediaConfig)[0];
+    index: number;
+    isModal: boolean;
+    onPlay: () => void;
+    onPause: () => void;
+    videoRef: (el: HTMLVideoElement | null) => void;
+  }) => (
+    <video
+      ref={videoRef}
+      src={item.src}
+      poster={item.poster}
+      className={`${
+        isModal
+          ? "max-w-full max-h-full w-auto h-auto object-contain shadow-xl rounded-lg"
+          : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
+      }`}
+      controls={isModal}
+      preload="metadata"
+      playsInline
+      webkit-playsinline="true"
+      muted={!isModal}
+      onPlay={onPlay}
+      onPause={onPause}
+    >
+      <source src={item.src} type="video/mp4" />
+      <source src={item.src} type="video/quicktime" />
+      Votre navigateur ne supporte pas les vidéos.
+    </video>
+  )
+);
 
-VideoComponent.displayName = 'VideoComponent';
+VideoComponent.displayName = "VideoComponent";
 
 // Memoized image component for performance
-const ImageComponent = memo(({ item, index, isModal }: {
-  item: typeof mediaConfig[0];
-  index: number;
-  isModal: boolean;
-}) => (
-  <Image
-    src={item.src}
-    alt={item.alt}
-    width={isModal ? 800 : 320}
-    height={isModal ? 600 : 320}
-    className={`${
-      isModal
-        ? "max-w-full max-h-full w-auto h-auto object-contain shadow-xl rounded-lg"
-        : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
-    }`}
-    priority={isModal || index === 0}
-    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-  />
-));
+const ImageComponent = memo(
+  ({
+    item,
+    index,
+    isModal,
+  }: {
+    item: (typeof mediaConfig)[0];
+    index: number;
+    isModal: boolean;
+  }) => {
+    return (
+      <Image
+        src={item.src}
+        alt={item.alt}
+        width={isModal ? 800 : 320}
+        height={isModal ? 600 : 320}
+        className={`${
+          isModal
+            ? "max-w-full max-h-full w-auto h-auto object-contain shadow-xl rounded-lg"
+            : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
+        }`}
+        priority={isModal || index === 0}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    );
+  }
+);
 
-ImageComponent.displayName = 'ImageComponent';
+ImageComponent.displayName = "ImageComponent";
 
 // Memoized thumbnail component for performance
-const ThumbnailComponent = memo(({ item, index, onOpen }: {
-  item: typeof mediaConfig[0];
-  index: number;
-  onOpen: (index: number) => void;
-}) => {
-  const handleClick = useCallback(() => onOpen(index), [index, onOpen]);
-  
-  return (
-    <CarouselItem
-      key={`thumb-${item.src}`}
-      className="pl-2 basis-1/3 md:basis-1/4"
-    >
-      <div className="text-center">
-        <div
-          className="relative group cursor-pointer"
-          onClick={handleClick}
-          onKeyDown={(e) => e.key === "Enter" && handleClick()}
-          tabIndex={0}
-          role="button"
-          aria-label={`Ouvrir ${
-            item.type === "video" ? "la vidéo" : "la photo"
-          } : ${item.caption}`}
-        >
-          {item.type === "video" ? (
-            <div className="relative">
+const ThumbnailComponent = memo(
+  ({
+    item,
+    index,
+    onOpen,
+  }: {
+    item: (typeof mediaConfig)[0];
+    index: number;
+    onOpen: (index: number) => void;
+  }) => {
+    const handleClick = useCallback(() => onOpen(index), [index, onOpen]);
+
+    return (
+      <CarouselItem
+        key={`thumb-${item.src}`}
+        className="pl-2 basis-1/3 md:basis-1/4"
+      >
+        <div className="text-center">
+          <div
+            className="relative group cursor-pointer"
+            onClick={handleClick}
+            onKeyDown={(e) => e.key === "Enter" && handleClick()}
+            tabIndex={0}
+            role="button"
+            aria-label={`Ouvrir ${
+              item.type === "video" ? "la vidéo" : "la photo"
+            } : ${item.caption}`}
+          >
+            {item.type === "video" ? (
+              <div className="relative">
+                <Image
+                  src={item.poster || "/tao-main.jpg"}
+                  alt={item.alt}
+                  width={100}
+                  height={100}
+                  className="w-full aspect-square object-cover rounded-lg border border-gray-200"
+                  loading="lazy"
+                />
+                <div className="absolute bottom-1 right-1">
+                  <div className="bg-orange-600 rounded-full p-1">
+                    <Play className="w-3 h-3 text-white fill-current" />
+                  </div>
+                </div>
+              </div>
+            ) : (
               <Image
-                src={item.poster || "/tao-main.jpg"}
+                src={item.src}
                 alt={item.alt}
                 width={100}
                 height={100}
                 className="w-full aspect-square object-cover rounded-lg border border-gray-200"
                 loading="lazy"
               />
-              <div className="absolute bottom-1 right-1">
-                <div className="bg-orange-600 rounded-full p-1">
-                  <Play className="w-3 h-3 text-white fill-current" />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <Image
-              src={item.src}
-              alt={item.alt}
-              width={100}
-              height={100}
-              className="w-full aspect-square object-cover rounded-lg border border-gray-200"
-              loading="lazy"
-            />
-          )}
+            )}
+          </div>
+          <p className="text-xs text-gray-600 mt-1 font-medium leading-tight truncate">
+            {item.caption}
+          </p>
         </div>
-        <p className="text-xs text-gray-600 mt-1 font-medium leading-tight truncate">
-          {item.caption}
-        </p>
-      </div>
-    </CarouselItem>
-  );
-});
+      </CarouselItem>
+    );
+  }
+);
 
-ThumbnailComponent.displayName = 'ThumbnailComponent';
+ThumbnailComponent.displayName = "ThumbnailComponent";
 
 function PhotoGallery() {
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
+    null
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -208,102 +242,111 @@ function PhotoGallery() {
   const media = useMemo(() => mediaConfig, []);
 
   // Memoized callbacks for video autoplay
-  const handleVideoAutoplay = useCallback((currentIndex: number) => {
-    // Pause all carousel videos first
-    carouselVideoRefs.current.forEach((video, index) => {
-      if (video && index !== currentIndex) {
-        video.pause();
-        video.currentTime = 0;
-      }
-    });
+  const handleVideoAutoplay = useCallback(
+    (currentIndex: number) => {
+      // Pause all carousel videos first
+      carouselVideoRefs.current.forEach((video, index) => {
+        if (video && index !== currentIndex) {
+          video.pause();
+          video.currentTime = 0;
+        }
+      });
 
-    // Play current video if it's a video
-    const currentMedia = media[currentIndex];
+      // Play current video if it's a video
+      const currentMedia = media[currentIndex];
 
-    if (
-      currentMedia?.type === "video" &&
-      carouselVideoRefs.current[currentIndex]
-    ) {
-      const video = carouselVideoRefs.current[currentIndex];
+      if (
+        currentMedia?.type === "video" &&
+        carouselVideoRefs.current[currentIndex]
+      ) {
+        const video = carouselVideoRefs.current[currentIndex];
 
-      if (video) {
-        // Wait for video to be ready
-        const attemptPlay = () => {
-          if (video.readyState >= 3) {
-            // HAVE_FUTURE_DATA or better
-            // Only attempt autoplay if user has interacted or video is muted
-            if (hasUserInteracted || video.muted) {
-              video.play().catch(() => {
-                // Autoplay failed (browser policy), that's ok
-              });
+        if (video) {
+          // Wait for video to be ready
+          const attemptPlay = () => {
+            if (video.readyState >= 3) {
+              // HAVE_FUTURE_DATA or better
+              // Only attempt autoplay if user has interacted or video is muted
+              if (hasUserInteracted || video.muted) {
+                video.play().catch(() => {
+                  // Autoplay failed (browser policy), that's ok
+                });
+              }
+            } else {
+              // Wait a bit more for video to load
+              setTimeout(attemptPlay, 100);
             }
-          } else {
-            // Wait a bit more for video to load
-            setTimeout(attemptPlay, 100);
-          }
-        };
+          };
 
-        // Reset video to start and attempt autoplay
-        video.currentTime = 0;
-        attemptPlay();
+          // Reset video to start and attempt autoplay
+          video.currentTime = 0;
+          attemptPlay();
+        }
       }
-    }
-  }, [hasUserInteracted, media]);
+    },
+    [hasUserInteracted, media]
+  );
 
-  const handleModalVideoAutoplay = useCallback((currentIndex: number) => {
-    // Pause all modal videos first
-    modalVideoRefs.current.forEach((video, index) => {
-      if (video && index !== currentIndex) {
-        video.pause();
-        video.currentTime = 0;
-      }
-    });
+  const handleModalVideoAutoplay = useCallback(
+    (currentIndex: number) => {
+      // Pause all modal videos first
+      modalVideoRefs.current.forEach((video, index) => {
+        if (video && index !== currentIndex) {
+          video.pause();
+          video.currentTime = 0;
+        }
+      });
 
-    // Play current video if it's a video
-    const currentMedia = media[currentIndex];
+      // Play current video if it's a video
+      const currentMedia = media[currentIndex];
 
-    if (
-      currentMedia?.type === "video" &&
-      modalVideoRefs.current[currentIndex]
-    ) {
-      const video = modalVideoRefs.current[currentIndex];
+      if (
+        currentMedia?.type === "video" &&
+        modalVideoRefs.current[currentIndex]
+      ) {
+        const video = modalVideoRefs.current[currentIndex];
 
-      if (video) {
-        // Wait for video to be ready
-        const attemptPlay = () => {
-          if (video.readyState >= 3) {
-            // HAVE_FUTURE_DATA or better
-            // Only attempt autoplay if user has interacted or video is muted
-            if (hasUserInteracted || video.muted) {
-              video.play().catch(() => {
-                // Autoplay failed (browser policy), that's ok
-              });
+        if (video) {
+          // Wait for video to be ready
+          const attemptPlay = () => {
+            if (video.readyState >= 3) {
+              // HAVE_FUTURE_DATA or better
+              // Only attempt autoplay if user has interacted or video is muted
+              if (hasUserInteracted || video.muted) {
+                video.play().catch(() => {
+                  // Autoplay failed (browser policy), that's ok
+                });
+              }
+            } else {
+              // Wait a bit more for video to load
+              setTimeout(attemptPlay, 100);
             }
-          } else {
-            // Wait a bit more for video to load
-            setTimeout(attemptPlay, 100);
-          }
-        };
+          };
 
-        // Reset video to start and attempt autoplay
-        video.currentTime = 0;
-        attemptPlay();
+          // Reset video to start and attempt autoplay
+          video.currentTime = 0;
+          attemptPlay();
+        }
       }
-    }
-  }, [hasUserInteracted, media]);
+    },
+    [hasUserInteracted, media]
+  );
 
-  const openPhoto = useCallback((index: number) => {
-    setSelectedPhotoIndex(index);
-    setIsDialogOpen(true);
+  const openPhoto = useCallback(
+    (index: number) => {
+      setSelectedPhotoIndex(index);
+      setIsDialogOpen(true);
 
-    // Auto-trigger video autoplay when modal opens on video slide
-    if (media[index]?.type === "video") {
-      // Give more time for modal and carousel to fully render
-      setTimeout(() => {
-        handleModalVideoAutoplay(index);
-      }, 500);
-    }
-  }, [media, handleModalVideoAutoplay]);
+      // Auto-trigger video autoplay when modal opens on video slide
+      if (media[index]?.type === "video") {
+        // Give more time for modal and carousel to fully render
+        setTimeout(() => {
+          handleModalVideoAutoplay(index);
+        }, 500);
+      }
+    },
+    [media, handleModalVideoAutoplay]
+  );
 
   const closePhoto = useCallback(() => {
     setIsDialogOpen(false);
@@ -318,43 +361,37 @@ function PhotoGallery() {
     setIsVideoPlaying(false);
   }, []);
 
-  const renderMediaItem = useCallback((
-    item: (typeof media)[0],
-    index: number,
-    isModal = false
-  ) => {
-    if (item.type === "video") {
-      return (
-        <VideoComponent
-          item={item}
-          index={index}
-          isModal={isModal}
-          onPlay={() => setIsVideoPlaying(true)}
-          onPause={() => setIsVideoPlaying(false)}
-          videoRef={isModal
-            ? (el) => {
-                if (modalVideoRefs.current) {
-                  modalVideoRefs.current[index] = el;
-                }
-              }
-            : (el) => {
-                if (carouselVideoRefs.current) {
-                  carouselVideoRefs.current[index] = el;
-                }
-              }
-          }
-        />
-      );
-    } else {
-      return (
-        <ImageComponent
-          item={item}
-          index={index}
-          isModal={isModal}
-        />
-      );
-    }
-  }, [media]);
+  const renderMediaItem = useCallback(
+    (item: (typeof media)[0], index: number, isModal = false) => {
+      if (item.type === "video") {
+        return (
+          <VideoComponent
+            item={item}
+            index={index}
+            isModal={isModal}
+            onPlay={() => setIsVideoPlaying(true)}
+            onPause={() => setIsVideoPlaying(false)}
+            videoRef={
+              isModal
+                ? (el) => {
+                    if (modalVideoRefs.current) {
+                      modalVideoRefs.current[index] = el;
+                    }
+                  }
+                : (el) => {
+                    if (carouselVideoRefs.current) {
+                      carouselVideoRefs.current[index] = el;
+                    }
+                  }
+            }
+          />
+        );
+      } else {
+        return <ImageComponent item={item} index={index} isModal={isModal} />;
+      }
+    },
+    [media]
+  );
 
   useEffect(() => {
     if (!api) {
@@ -646,7 +683,7 @@ function PhotoGallery() {
               <div className="absolute inset-0 rounded-2xl overflow-hidden">
                 <Carousel
                   setApi={setModalApi}
-                  className="w-full h-full rounded-2xl"
+                  className="w-full h-full flex items-center justify-center rounded-2xl"
                   opts={{
                     startIndex: selectedPhotoIndex || 0,
                     loop: true,
@@ -656,7 +693,7 @@ function PhotoGallery() {
                     {media.map((item, index) => (
                       <CarouselItem
                         key={`modal-${item.src}-${index}`}
-                        className="h-full flex items-center justify-center"
+                        className="h-full flex items-center justify-center w-full"
                       >
                         <div className="w-full h-full flex items-center justify-center p-2">
                           {renderMediaItem(item, index, true)}
@@ -676,7 +713,7 @@ function PhotoGallery() {
             <div className="p-4 bg-gradient-to-t from-white to-gray-50 flex items-center justify-center rounded-b-3xl">
               <div className="text-center bg-white/60 backdrop-blur-sm px-4 py-2 rounded-2xl">
                 <p className="text-lg font-medium text-gray-800">
-                  {media[modalCurrentIndex]?.type === "video" ? "📹" : "📸"}
+                  {media[modalCurrentIndex]?.type === "video" ? "📹" : "📸"}{" "}
                   {modalCurrentIndex + 1} sur {media.length}
                 </p>
                 <p className="text-sm text-gray-600 mt-1 line-clamp-1">

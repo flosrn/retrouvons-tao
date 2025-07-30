@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { UploadDropzone } from "@/lib/uploadthing"
-import { Camera, CheckCircle, MapPin, MessageCircle, Phone, Send, User, Upload } from "lucide-react"
+import { Camera, CheckCircle, MapPin, MessageCircle, Phone, Send, User, Upload, Loader2, CloudUpload, Image } from "lucide-react"
 import type React from "react"
 import { useState, useCallback, memo } from "react"
 
@@ -115,14 +115,43 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
           allowedContent: () => <span>Photo obligatoire pour valider le signalement</span>,
           button: ({ ready, isUploading, uploadProgress, files }) => {
             if (isUploading && uploadProgress !== undefined) {
-              return `Upload ${uploadProgress}%`;
+              return (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Upload {uploadProgress}%
+                </span>
+              );
             }
-            if (isUploading) return "Upload en cours...";
+            if (isUploading) {
+              return (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Upload en cours...
+                </span>
+              );
+            }
             if (files && files.length > 0) {
-              return `Uploader ${files.length > 1 ? `${files.length} photos` : 'la photo'}`;
+              return (
+                <span className="flex items-center gap-2">
+                  <CloudUpload className="w-4 h-4" />
+                  Uploader {files.length > 1 ? `${files.length} photos` : 'la photo'}
+                </span>
+              );
             }
-            if (ready) return "Choisir une photo";
-            return "Préparation...";
+            if (ready) {
+              return (
+                <span className="flex items-center gap-2">
+                  <Image className="w-4 h-4" />
+                  Choisir une photo
+                </span>
+              );
+            }
+            return (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Préparation...
+              </span>
+            );
           }
         }}
       />

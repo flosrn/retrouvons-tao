@@ -5,8 +5,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { UploadButton } from "@/lib/uploadthing"
-import { Camera, CheckCircle, MapPin, MessageCircle, Phone, Send, User } from "lucide-react"
+import { UploadDropzone } from "@/lib/uploadthing"
+import { Camera, CheckCircle, MapPin, MessageCircle, Phone, Send, User, Upload } from "lucide-react"
 import type React from "react"
 import { useState, useCallback, memo } from "react"
 
@@ -36,11 +36,28 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
       setFormData((prev: any) => ({ 
         ...prev, 
         photoUrl: res[0].key ? `https://utfs.io/f/${res[0].key}` : res[0].url,
-        photoName: res[0].name || res[0].safeFileName || 'photo.jpg'
+        photoName: res[0].name || 'photo.jpg'
       }))
       console.log('Photo uploaded successfully:', res[0]);
     }
   }, [setFormData]);
+
+  const handleUploadError = useCallback((error: Error) => {
+    console.error('Upload error details:', error);
+    
+    let errorMessage = error.message;
+    
+    // Handle specific UploadThing errors
+    if (errorMessage.includes('Invalid token')) {
+      errorMessage = 'Erreur de configuration du service d\'upload. Veuillez réessayer ou nous contacter directement.';
+    } else if (errorMessage.includes('Network')) {
+      errorMessage = 'Problème de connexion. Vérifiez votre connexion internet et réessayez.';
+    } else if (errorMessage.includes('Something went wrong')) {
+      errorMessage = 'Erreur du service d\'upload. Veuillez réessayer dans quelques instants.';
+    }
+    
+    alert(`Erreur lors de l'upload: ${errorMessage}`);
+  }, []);
 
   const clearPhoto = useCallback(() => {
     setFormData((prev: any) => ({ ...prev, photoUrl: "", photoName: "" }));
@@ -77,34 +94,32 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
   }
 
   return (
-    <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center bg-orange-50">
-      <Camera className="w-12 h-12 text-orange-400 mx-auto mb-2" />
-      <p className="text-gray-600 font-medium mb-2">
-        Uploadez une photo du chat
-      </p>
-      <UploadButton
+    <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 bg-orange-50">
+      <UploadDropzone
         endpoint="imageUploader"
         onClientUploadComplete={handlePhotoUpload}
-        onUploadError={(error: Error) => {
-          console.error('Upload error details:', error);
-          let errorMessage = error.message;
-          
-          // Handle specific UploadThing errors
-          if (errorMessage.includes('Invalid token')) {
-            errorMessage = 'Erreur de configuration du service d\'upload. Veuillez réessayer ou nous contacter directement.';
-          } else if (errorMessage.includes('Network')) {
-            errorMessage = 'Problème de connexion. Vérifiez votre connexion internet et réessayez.';
-          } else if (errorMessage.includes('Something went wrong')) {
-            errorMessage = 'Erreur du service d\'upload. Veuillez réessayer dans quelques instants.';
-          }
-          
-          alert(`Erreur lors de l'upload: ${errorMessage}`);
+        onUploadError={handleUploadError}
+        onUploadBegin={() => {
+          console.log('Upload started');
         }}
         appearance={{
-          button: "ut-ready:bg-blue-600 ut-uploading:cursor-not-allowed rounded-md bg-blue-600 after:bg-blue-400",
+          container: "w-full h-32 border-0 bg-transparent",
+          uploadIcon: "text-orange-400",
+          label: "text-gray-600 font-medium text-sm",
+          allowedContent: "text-gray-500 text-xs mt-1",
+          button: "bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 font-medium ut-ready:bg-blue-600 ut-uploading:bg-blue-400 ut-uploading:cursor-not-allowed"
+        }}
+        content={{
+          uploadIcon: () => <Camera className="w-12 h-12" />,
+          label: () => <span>Uploadez une photo du chat</span>,
+          allowedContent: () => <span>Photo obligatoire pour valider le signalement</span>,
+          button: ({ ready, isUploading }) => {
+            if (isUploading) return "Upload en cours...";
+            if (ready) return "Choisir une photo";
+            return "Préparation...";
+          }
         }}
       />
-      <p className="text-sm text-gray-500 mt-2">Photo obligatoire pour valider le signalement</p>
     </div>
   );
 });

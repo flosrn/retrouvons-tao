@@ -1,7 +1,18 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 
-const f = createUploadthing();
+const f = createUploadthing({
+  /**
+   * Log out more information about the error, but don't return it to the client
+   * @see https://docs.uploadthing.com/errors#error-formatting
+   */
+  errorFormatter: (err) => {
+    console.log("Upload error:", err.message);
+    console.log("  - Above error caused by:", err.cause);
+    console.log("  - Above error stack:", err.stack);
+    return { message: err.message };
+  },
+});
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
@@ -16,8 +27,7 @@ export const ourFileRouter = {
       maxFileCount: 1,
     },
   })
-    // Set permissions and file types for this FileRoute
-    .middleware(async ({ req }) => {
+    .middleware(async ({ files }) => {
       // This code runs on your server before upload
       // Check if UPLOADTHING_TOKEN is configured
       if (!process.env.UPLOADTHING_TOKEN) {
@@ -25,25 +35,36 @@ export const ourFileRouter = {
         throw new UploadThingError('Server configuration error');
       }
       
-      // For now, we'll allow all uploads (no authentication required)
-      // You can add authentication logic here later if needed
+      // Generate safe filename automatically
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 8);
+      const originalFile = files[0];
+      const fileExtension = originalFile?.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const safeFileName = `tao-sighting-${timestamp}-${randomId}.${fileExtension}`;
       
-      // Whatever is returned here is accessible in onUploadComplete as `metadata`
+      console.log(`Auto-renaming file: "${originalFile?.name}" -> "${safeFileName}"`);
+      
+      // Store original filename in metadata
       return { 
         uploadedAt: new Date().toISOString(),
-        source: "tao-sighting-form"
+        source: "tao-sighting-form",
+        originalFileName: originalFile?.name || 'unknown',
+        safeFileName,
+        userId: "anonymous" // For future authentication
       };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for Tao sighting");
-      console.log("File URL:", file.url);
-      console.log("File metadata:", metadata);
+      console.log("File key:", file.key);
+      console.log("Original filename:", metadata.originalFileName);
+      console.log("Safe filename:", metadata.safeFileName);
 
       // Return data that will be sent to the client
       return { 
-        url: file.url,
-        name: file.name,
+        key: file.key,
+        name: metadata.originalFileName,
+        safeFileName: metadata.safeFileName,
         size: file.size,
         uploadedAt: metadata.uploadedAt
       };

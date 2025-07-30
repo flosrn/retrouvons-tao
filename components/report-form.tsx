@@ -35,9 +35,10 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
     if (res && res[0]) {
       setFormData((prev: any) => ({ 
         ...prev, 
-        photoUrl: res[0].url,
-        photoName: res[0].name
+        photoUrl: res[0].key ? `https://utfs.io/f/${res[0].key}` : res[0].url,
+        photoName: res[0].name || res[0].safeFileName || 'photo.jpg'
       }))
+      console.log('Photo uploaded successfully:', res[0]);
     }
   }, [setFormData]);
 
@@ -93,9 +94,14 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
             errorMessage = 'Erreur de configuration du service d\'upload. Veuillez réessayer ou nous contacter directement.';
           } else if (errorMessage.includes('Network')) {
             errorMessage = 'Problème de connexion. Vérifiez votre connexion internet et réessayez.';
+          } else if (errorMessage.includes('Something went wrong')) {
+            errorMessage = 'Erreur du service d\'upload. Veuillez réessayer dans quelques instants.';
           }
           
           alert(`Erreur lors de l'upload: ${errorMessage}`);
+        }}
+        appearance={{
+          button: "ut-ready:bg-blue-600 ut-uploading:cursor-not-allowed rounded-md bg-blue-600 after:bg-blue-400",
         }}
       />
       <p className="text-sm text-gray-500 mt-2">Photo obligatoire pour valider le signalement</p>

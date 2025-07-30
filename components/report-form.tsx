@@ -107,7 +107,7 @@ const PhotoUploadSection = memo(({ formData, setFormData }: {
           uploadIcon: "text-orange-400",
           label: "text-gray-600 font-medium text-sm",
           allowedContent: "text-gray-500 text-xs mt-1",
-          button: "bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 font-medium ut-ready:bg-blue-600 ut-uploading:bg-blue-400 ut-uploading:cursor-not-allowed"
+          button: "bg-orange-600 hover:bg-orange-700 text-white rounded-md px-4 py-2 font-medium transition-colors ut-ready:bg-orange-600 ut-ready:text-white ut-uploading:bg-orange-400 ut-uploading:cursor-not-allowed ut-uploading:text-white"
         }}
         content={{
           uploadIcon: () => <Camera className="w-12 h-12" />,

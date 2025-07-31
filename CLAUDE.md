@@ -17,6 +17,12 @@ This is a Next.js 15 application for a missing pet website ("Retrouvons Tao" - F
 ### Package Management
 This project uses **pnpm** as the package manager (pnpm-lock.yaml present)
 
+### Development Tools & Testing
+- **MCP Rewatch**: ALWAYS use MCP Rewatch to start development server and monitor server logs
+- **MCP Playwright**: ALWAYS use MCP Playwright for frontend testing and browser automation
+- **Server Analysis**: Monitor and analyze server logs through MCP Rewatch for debugging and performance monitoring
+- **Frontend Testing**: Test frontend functionality using MCP Playwright with log analysis for comprehensive validation
+
 ## Architecture & Code Organization
 
 ### Application Structure

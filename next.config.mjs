@@ -66,11 +66,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "connect-src 'self' https://api.uploadthing.com https://utfs.io https://*.ingest.uploadthing.com https://sea1.ingest.uploadthing.com https://fonts.googleapis.com https://fonts.gstatic.com",
+              "connect-src 'self' https://api.uploadthing.com https://utfs.io https://*.ingest.uploadthing.com https://sea1.ingest.uploadthing.com https://fonts.googleapis.com https://fonts.gstatic.com https://plausible.io",
               "font-src 'self' https://fonts.gstatic.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https: http:",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
               "frame-src 'self'",

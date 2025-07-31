@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import dynamic from 'next/dynamic'
+import Script from 'next/script'
 import './globals.css'
 
 // Lazy load accessibility improvements
@@ -151,6 +152,17 @@ export default function RootLayout({
         }} />
       </head>
       <body>
+        {/* Plausible Analytics */}
+        <Script
+          defer
+          data-domain="retrouvons-tao.vercel.app"
+          src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
+          strategy="afterInteractive"
+        />
+        <Script id="plausible-init" strategy="afterInteractive">
+          {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
+        </Script>
+        
         <AccessibilityImprovements />
         <main id="main-content">
           {children}

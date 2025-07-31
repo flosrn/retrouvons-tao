@@ -121,18 +121,23 @@ const PhotoUploadSection = memo(
     }
 
     return (
-      <UploadDropzone
-        endpoint="imageUploader"
-        onClientUploadComplete={handlePhotoUpload}
-        onUploadError={handleUploadError}
-        onUploadBegin={() => {
-          console.log("Upload started");
-        }}
-        content={{
-          label: "Choisissez une image dans votre galerie",
-          allowedContent: "Image (8MB)",
-        }}
-      />
+      <div className="border-2 border-dashed border-orange-300 rounded-lg p-8 bg-orange-50 text-center">
+        <UploadDropzone
+          endpoint="imageUploader"
+          onClientUploadComplete={handlePhotoUpload}
+          onUploadError={handleUploadError}
+          onUploadBegin={() => {
+            console.log("Upload started");
+          }}
+          content={{
+            label: "Choisissez une image dans votre galerie",
+            allowedContent: "Image (8MB)",
+          }}
+          appearance={{
+            container: "w-full h-auto border-0 bg-transparent p-0",
+          }}
+        />
+      </div>
     );
   }
 );

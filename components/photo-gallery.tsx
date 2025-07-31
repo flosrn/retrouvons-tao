@@ -22,6 +22,14 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 // Memoized media configuration to prevent re-creation on each render
 const mediaConfig = [
   {
+    src: "/tao-chair.jpg",
+    type: "image" as const,
+    alt: "Tao sur fauteuil",
+    caption: "Sur fauteuil - vue trois-quarts, caractère doux et câlin",
+    description:
+      "Tao montrant son côté doux et câlin. Vue parfaite pour identifier ses traits faciaux.",
+  },
+  {
     src: "/tao-garden.jpg",
     type: "image" as const,
     alt: "Tao dans l'herbe",
@@ -29,7 +37,6 @@ const mediaConfig = [
     description:
       "Tao dans son environnement extérieur. Notez la robe gris tigré sur les côtés et les oreilles distinctives.",
   },
-
   {
     src: "/tao-profile.jpg",
     type: "image" as const,
@@ -37,14 +44,6 @@ const mediaConfig = [
     caption: "Vue de profil - caractéristiques distinctives",
     description:
       "Vue de profil de Tao montrant ses caractéristiques uniques et son expression.",
-  },
-  {
-    src: "/tao-chair.jpg",
-    type: "image" as const,
-    alt: "Tao sur fauteuil",
-    caption: "Sur fauteuil - vue trois-quarts, caractère doux et câlin",
-    description:
-      "Tao montrant son côté doux et câlin. Vue parfaite pour identifier ses traits faciaux.",
   },
   {
     src: "/tao-desk.jpg",
@@ -171,13 +170,13 @@ const ThumbnailComponent = memo(
     return (
       <CarouselItem
         key={`thumb-${item.src}`}
-        className="pl-2 basis-1/3 md:basis-1/4"
+        className="basis-[40%] md:basis-1/4 lg:basis-1/5"
       >
-        <div className="text-center p-2">
+        <div className="text-center p-1">
           <div
             className={`relative group cursor-pointer transition-all duration-200 ${
-              isSelected 
-                ? "ring-2 ring-orange-500 ring-offset-2 rounded-lg scale-105" 
+              isSelected
+                ? "ring-2 ring-orange-500 ring-offset-1 rounded-lg"
                 : "hover:scale-105"
             }`}
             onClick={handleClick}
@@ -215,7 +214,7 @@ const ThumbnailComponent = memo(
               />
             )}
           </div>
-          <p className="text-xs text-gray-600 mt-1 font-medium leading-tight truncate">
+          <p className="text-xs text-gray-600 mt-1 font-medium leading-tight truncate h-8">
             {item.caption}
           </p>
         </div>
@@ -232,14 +231,14 @@ function PhotoGallery() {
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(1);
   const [count, setCount] = useState(0);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const carouselVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const modalVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [modalApi, setModalApi] = useState<CarouselApi>();
   const [modalCurrentIndex, setModalCurrentIndex] = useState(0);
-  
+
   // API pour le carousel de thumbnails
   const [thumbApi, setThumbApi] = useState<CarouselApi>();
 
@@ -368,7 +367,6 @@ function PhotoGallery() {
     [api, thumbApi]
   );
 
-
   const renderMediaItem = useCallback(
     (item: (typeof media)[0], index: number, isModal = false) => {
       if (item.type === "video") {
@@ -479,6 +477,7 @@ function PhotoGallery() {
                 opts={{
                   align: "center",
                   loop: true,
+                  startIndex: 1,
                 }}
               >
                 <CarouselContent>
@@ -555,6 +554,7 @@ function PhotoGallery() {
                 align: "center",
                 dragFree: true,
                 containScroll: "trimSnaps",
+                startIndex: 1,
               }}
             >
               <CarouselContent className="-ml-2">
@@ -664,8 +664,8 @@ function PhotoGallery() {
       </Card>
 
       {/* Modal avec CSS Grid - Design playful avec arrondis */}
-      <Dialog 
-        open={isDialogOpen} 
+      <Dialog
+        open={isDialogOpen}
         onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) {

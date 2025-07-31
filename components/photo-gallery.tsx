@@ -121,7 +121,7 @@ const VideoComponent = memo(
 
 VideoComponent.displayName = "VideoComponent";
 
-// Memoized image component for performance
+// Memoized image component for performance with mobile optimizations
 const ImageComponent = memo(
   ({
     item,
@@ -143,8 +143,11 @@ const ImageComponent = memo(
             ? "max-w-full max-h-full w-auto h-auto object-contain shadow-xl rounded-lg"
             : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
         }`}
-        priority={isModal || index === 0}
+        priority={isModal || index <= 2} // Preload first 3 images for smooth carousel start
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        loading={index <= 2 ? "eager" : "lazy"} // Eager load first 3 images
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+Rev//Z"
       />
     );
   }
@@ -245,48 +248,50 @@ function PhotoGallery() {
   // Use stable reference to media config
   const media = useMemo(() => mediaConfig, []);
 
-  // Memoized callbacks for video autoplay
+  // Optimized video autoplay for mobile Safari performance
   const handleVideoAutoplay = useCallback(
     (currentIndex: number) => {
-      // Pause all carousel videos first
-      carouselVideoRefs.current.forEach((video, index) => {
-        if (video && index !== currentIndex) {
-          video.pause();
-          video.currentTime = 0;
+      // Use requestAnimationFrame for smoother performance
+      requestAnimationFrame(() => {
+        // Pause all carousel videos first
+        carouselVideoRefs.current.forEach((video, index) => {
+          if (video && index !== currentIndex) {
+            video.pause();
+            video.currentTime = 0;
+          }
+        });
+
+        // Play current video if it's a video
+        const currentMedia = media[currentIndex];
+
+        if (
+          currentMedia?.type === "video" &&
+          carouselVideoRefs.current[currentIndex]
+        ) {
+          const video = carouselVideoRefs.current[currentIndex];
+
+          if (video) {
+            // Optimized video loading for mobile Safari
+            const attemptPlay = () => {
+              if (video.readyState >= 2) { // HAVE_CURRENT_DATA - less strict for mobile
+                // Only attempt autoplay if user has interacted or video is muted
+                if (hasUserInteracted || video.muted) {
+                  video.play().catch(() => {
+                    // Autoplay failed (browser policy), that's ok
+                  });
+                }
+              } else {
+                // Reduced timeout for faster response
+                setTimeout(attemptPlay, 50);
+              }
+            };
+
+            // Reset video to start and attempt autoplay
+            video.currentTime = 0;
+            attemptPlay();
+          }
         }
       });
-
-      // Play current video if it's a video
-      const currentMedia = media[currentIndex];
-
-      if (
-        currentMedia?.type === "video" &&
-        carouselVideoRefs.current[currentIndex]
-      ) {
-        const video = carouselVideoRefs.current[currentIndex];
-
-        if (video) {
-          // Wait for video to be ready
-          const attemptPlay = () => {
-            if (video.readyState >= 3) {
-              // HAVE_FUTURE_DATA or better
-              // Only attempt autoplay if user has interacted or video is muted
-              if (hasUserInteracted || video.muted) {
-                video.play().catch(() => {
-                  // Autoplay failed (browser policy), that's ok
-                });
-              }
-            } else {
-              // Wait a bit more for video to load
-              setTimeout(attemptPlay, 100);
-            }
-          };
-
-          // Reset video to start and attempt autoplay
-          video.currentTime = 0;
-          attemptPlay();
-        }
-      }
     },
     [hasUserInteracted, media]
   );
@@ -406,29 +411,39 @@ function PhotoGallery() {
     setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap() + 1);
 
-    api.on("select", () => {
-      const currentIndex = api.selectedScrollSnap();
-      setCurrent(currentIndex + 1);
+    // Throttled select handler for better performance
+    let selectTimeout: NodeJS.Timeout | null = null;
+    const throttledSelect = () => {
+      if (selectTimeout) clearTimeout(selectTimeout);
+      selectTimeout = setTimeout(() => {
+        const currentIndex = api.selectedScrollSnap();
+        setCurrent(currentIndex + 1);
 
-      // Centrer le thumbnail sélectionné dans le carousel
-      if (thumbApi) {
-        thumbApi.scrollTo(currentIndex);
-      }
+        // Centrer le thumbnail sélectionné dans le carousel
+        if (thumbApi) {
+          thumbApi.scrollTo(currentIndex);
+        }
 
-      // Auto-play video when it comes into view
-      handleVideoAutoplay(currentIndex);
-    });
+        // Auto-play video when it comes into view
+        handleVideoAutoplay(currentIndex);
+      }, 16); // ~60fps throttling
+    };
 
-    // Enable autoplay after first user interaction
+    api.on("select", throttledSelect);
+
+    // Enable autoplay after first user interaction - optimized for mobile
     const enableAutoplay = () => {
       setHasUserInteracted(true);
     };
 
+    // Use passive listeners for better performance
+    document.addEventListener("touchstart", enableAutoplay, { once: true, passive: true });
     document.addEventListener("click", enableAutoplay, { once: true });
-    document.addEventListener("touchstart", enableAutoplay, { once: true });
 
     // Cleanup
     return () => {
+      if (selectTimeout) clearTimeout(selectTimeout);
+      api.off("select", throttledSelect);
       document.removeEventListener("click", enableAutoplay);
       document.removeEventListener("touchstart", enableAutoplay);
     };
@@ -478,6 +493,12 @@ function PhotoGallery() {
                   align: "center",
                   loop: true,
                   startIndex: 1,
+                  // Mobile Safari performance optimizations
+                  duration: 18, // Faster scroll duration
+                  skipSnaps: false,
+                  dragFree: false,
+                  // Prevent momentum scrolling issues on iOS
+                  containScroll: "trimSnaps",
                 }}
               >
                 <CarouselContent>
@@ -555,6 +576,9 @@ function PhotoGallery() {
                 dragFree: true,
                 containScroll: "trimSnaps",
                 startIndex: 1,
+                // Performance optimization for thumbnail scrolling
+                duration: 15,
+                skipSnaps: false,
               }}
             >
               <CarouselContent className="-ml-2">
@@ -716,6 +740,10 @@ function PhotoGallery() {
                   opts={{
                     startIndex: selectedPhotoIndex || 0,
                     loop: true,
+                    // Optimized for modal performance
+                    duration: 18,
+                    skipSnaps: false,
+                    containScroll: "trimSnaps",
                   }}
                 >
                   <CarouselContent className="h-full">

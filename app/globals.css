@@ -171,6 +171,76 @@
     animation: shimmer 2s linear infinite;
   }
 
+  /* Mobile Safari carousel performance optimizations */
+  .embla {
+    /* Enable hardware acceleration */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    /* Improve touch scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent momentum scrolling issues */
+    overscroll-behavior: none;
+  }
+
+  .embla__viewport {
+    /* Hardware acceleration for smooth scrolling */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* Optimize scrolling behavior on mobile */
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    /* Prevent text selection during drag */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  .embla__container {
+    /* Hardware acceleration for smooth transform */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* Optimize for 60fps animations */
+    will-change: transform;
+  }
+
+  .embla__slide {
+    /* Enable hardware acceleration for each slide */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* Prevent layout shifts */
+    contain: layout;
+  }
+
+  /* Safari-specific optimizations */
+  @supports (-webkit-appearance: none) {
+    .embla__viewport {
+      /* Improve Safari touch responsiveness */
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .embla__slide img,
+    .embla__slide video {
+      /* Prevent Safari image flickering */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+    }
+  }
+
+  /* Reduce motion for better performance on low-end devices */
+  @media (prefers-reduced-motion: reduce) {
+    .embla__container {
+      will-change: auto;
+    }
+  }
+
 }
 
 @keyframes gentle-pulse {

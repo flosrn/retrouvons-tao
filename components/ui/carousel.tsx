@@ -62,6 +62,13 @@ const Carousel = React.forwardRef<
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
+        // Performance optimizations for mobile Safari
+        skipSnaps: false,
+        dragFree: false,
+        // Reduce scroll duration for faster response
+        duration: 20,
+        // Improve mobile touch handling
+        startIndex: opts?.startIndex || 0,
       },
       plugins
     );
@@ -78,11 +85,17 @@ const Carousel = React.forwardRef<
     }, []);
 
     const scrollPrev = React.useCallback(() => {
-      api?.scrollPrev();
+      // Performance optimization for mobile Safari
+      if (api) {
+        api.scrollPrev();
+      }
     }, [api]);
 
     const scrollNext = React.useCallback(() => {
-      api?.scrollNext();
+      // Performance optimization for mobile Safari  
+      if (api) {
+        api.scrollNext();
+      }
     }, [api]);
 
     const handleKeyDown = React.useCallback(
@@ -137,7 +150,7 @@ const Carousel = React.forwardRef<
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
-          className={cn("relative", className)}
+          className={cn("embla relative", className)}
           role="region"
           aria-roledescription="carousel"
           {...props}
@@ -157,11 +170,11 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden w-full h-full">
+    <div ref={carouselRef} className="embla__viewport overflow-hidden w-full h-full">
       <div
         ref={ref}
         className={cn(
-          "flex",
+          "embla__container flex",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
           className
         )}
@@ -184,7 +197,7 @@ const CarouselItem = React.forwardRef<
       role="group"
       aria-roledescription="slide"
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
+        "embla__slide min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",
         className
       )}

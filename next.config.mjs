@@ -36,6 +36,10 @@ const nextConfig = {
   experimental: {
     optimizeCss: false,
   },
+  // Disable UploadThing service worker that conflicts with Google Fonts
+  env: {
+    UPLOADTHING_DISABLE_SW: 'true',
+  },
   async headers() {
     return [
       {
@@ -53,6 +57,26 @@ const nextConfig = {
             key: 'Access-Control-Allow-Headers',
             value: 'Content-Type, Authorization',
           },
+        ],
+      },
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "connect-src 'self' https://api.uploadthing.com https://utfs.io https://*.ingest.uploadthing.com https://sea1.ingest.uploadthing.com https://fonts.googleapis.com https://fonts.gstatic.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "img-src 'self' data: https: http:",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "worker-src 'self' blob:",
+              "child-src 'self' blob:",
+              "frame-src 'self'",
+              "manifest-src 'self'"
+            ].join('; ')
+          }
         ],
       },
     ]

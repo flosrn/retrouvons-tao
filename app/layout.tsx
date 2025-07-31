@@ -78,19 +78,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
-        {/* Font preloading - restored original */}
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Bangers&display=swap"
-          as="style"
-          onLoad="this.onload=null;this.rel='stylesheet'"
-        />
-        <noscript>
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Bangers&display=swap"
-          />
-        </noscript>
         
         {/* Structured data for SEO */}
         <script
@@ -143,8 +130,6 @@ export default function RootLayout({
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>" />
         
-        {/* Preload critical resources - optimized for LCP */}
-        <link rel="preload" href="/tao-main.jpg" as="image" fetchPriority="high" />
         
         <style>{`
             html {
@@ -153,6 +138,17 @@ export default function RootLayout({
               --font-mono: ${GeistMono.variable};
             }
         `}</style>
+        
+        {/* Register custom service worker to override UploadThing's restrictive CSP */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('Custom SW registered'))
+                .catch(error => console.log('Custom SW registration failed'));
+            }
+          `
+        }} />
       </head>
       <body>
         <AccessibilityImprovements />

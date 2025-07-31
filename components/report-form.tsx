@@ -1,168 +1,224 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { UploadDropzone } from "@/lib/uploadthing"
-import { Camera, CheckCircle, MapPin, MessageCircle, Phone, Send, User, Upload, Loader2, CloudUpload, Image } from "lucide-react"
-import type React from "react"
-import { useState, useCallback, memo } from "react"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { UploadDropzone } from "@/lib/uploadthing";
+import {
+  Camera,
+  CheckCircle,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Send,
+  User,
+  Upload,
+  Loader2,
+  CloudUpload,
+  Image,
+} from "lucide-react";
+import type React from "react";
+import { useState, useCallback, memo } from "react";
 
 // Success message component - memoized for performance
 const SuccessMessage = memo(() => (
   <Card className="bg-green-50 border-green-200">
     <CardContent className="p-6 text-center">
       <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-      <h3 className="text-xl font-bold text-green-800 mb-2">Merci pour votre signalement !</h3>
+      <h3 className="text-xl font-bold text-green-800 mb-2">
+        Merci pour votre signalement !
+      </h3>
       <p className="text-green-700 mb-4">
-        Nous avons bien reçu votre message. Nous vous contacterons rapidement pour vérifier les informations.
+        Nous avons bien reçu votre message. Nous vous contacterons rapidement
+        pour vérifier les informations.
       </p>
-      <p className="text-sm text-green-600">Si c'est bien Tao, la récompense de 500€ vous sera remise !</p>
+      <p className="text-sm text-green-600">
+        Si c'est bien Tao, la récompense de 500€ vous sera remise !
+      </p>
     </CardContent>
   </Card>
 ));
 
-SuccessMessage.displayName = 'SuccessMessage';
+SuccessMessage.displayName = "SuccessMessage";
 
 // Photo upload component - memoized for performance
-const PhotoUploadSection = memo(({ formData, setFormData }: {
-  formData: any;
-  setFormData: React.Dispatch<React.SetStateAction<any>>;
-}) => {
-  const handlePhotoUpload = useCallback((res: any) => {
-    if (res && res[0]) {
-      setFormData((prev: any) => ({ 
-        ...prev, 
-        photoUrl: res[0].key ? `https://utfs.io/f/${res[0].key}` : res[0].url,
-        photoName: res[0].name || 'photo.jpg'
-      }))
-      console.log('Photo uploaded successfully:', res[0]);
-    }
-  }, [setFormData]);
+const PhotoUploadSection = memo(
+  ({
+    formData,
+    setFormData,
+  }: {
+    formData: any;
+    setFormData: React.Dispatch<React.SetStateAction<any>>;
+  }) => {
+    const handlePhotoUpload = useCallback(
+      (res: any) => {
+        if (res && res[0]) {
+          setFormData((prev: any) => ({
+            ...prev,
+            photoUrl: res[0].key
+              ? `https://utfs.io/f/${res[0].key}`
+              : res[0].url,
+            photoName: res[0].name || "photo.jpg",
+          }));
+          console.log("Photo uploaded successfully:", res[0]);
+        }
+      },
+      [setFormData]
+    );
 
-  const handleUploadError = useCallback((error: Error) => {
-    console.error('Upload error details:', error);
-    
-    let errorMessage = error.message;
-    
-    // Handle specific UploadThing errors
-    if (errorMessage.includes('Invalid token')) {
-      errorMessage = 'Erreur de configuration du service d\'upload. Veuillez réessayer ou nous contacter directement.';
-    } else if (errorMessage.includes('Network')) {
-      errorMessage = 'Problème de connexion. Vérifiez votre connexion internet et réessayez.';
-    } else if (errorMessage.includes('Something went wrong')) {
-      errorMessage = 'Erreur du service d\'upload. Veuillez réessayer dans quelques instants.';
-    }
-    
-    alert(`Erreur lors de l'upload: ${errorMessage}`);
-  }, []);
+    const handleUploadError = useCallback((error: Error) => {
+      console.error("Upload error details:", error);
 
-  const clearPhoto = useCallback(() => {
-    setFormData((prev: any) => ({ ...prev, photoUrl: "", photoName: "" }));
-  }, [setFormData]);
+      let errorMessage = error.message;
 
-  if (formData.photoUrl) {
-    return (
-      <div className="border-2 border-green-300 rounded-lg p-4 bg-green-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
-            <div>
-              <p className="text-green-700 font-medium">Photo uploadée avec succès !</p>
-              <p className="text-sm text-green-600">{formData.photoName}</p>
+      // Handle specific UploadThing errors
+      if (errorMessage.includes("Invalid token")) {
+        errorMessage =
+          "Erreur de configuration du service d'upload. Veuillez réessayer ou nous contacter directement.";
+      } else if (errorMessage.includes("Network")) {
+        errorMessage =
+          "Problème de connexion. Vérifiez votre connexion internet et réessayez.";
+      } else if (errorMessage.includes("Something went wrong")) {
+        errorMessage =
+          "Erreur du service d'upload. Veuillez réessayer dans quelques instants.";
+      }
+
+      alert(`Erreur lors de l'upload: ${errorMessage}`);
+    }, []);
+
+    const clearPhoto = useCallback(() => {
+      setFormData((prev: any) => ({ ...prev, photoUrl: "", photoName: "" }));
+    }, [setFormData]);
+
+    if (formData.photoUrl) {
+      return (
+        <div className="border-2 border-green-300 rounded-lg p-4 bg-green-50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
+              <div>
+                <p className="text-green-700 font-medium">
+                  Photo uploadée avec succès !
+                </p>
+                <p className="text-sm text-green-600">{formData.photoName}</p>
+              </div>
             </div>
+            <img
+              src={formData.photoUrl}
+              alt="Photo uploadée"
+              className="w-16 h-16 object-cover rounded-lg"
+            />
           </div>
-          <img 
-            src={formData.photoUrl} 
-            alt="Photo uploadée" 
-            className="w-16 h-16 object-cover rounded-lg"
-          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2 text-orange-600 border-orange-300 hover:bg-orange-50"
+            onClick={clearPhoto}
+          >
+            Changer la photo
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="mt-2 text-orange-600 border-orange-300 hover:bg-orange-50"
-          onClick={clearPhoto}
-        >
-          Changer la photo
-        </Button>
+      );
+    }
+
+    return (
+      <div className="border-2 border-dashed border-orange-300 rounded-lg p-8 bg-orange-50 text-center">
+        <UploadDropzone
+          endpoint="imageUploader"
+          onClientUploadComplete={handlePhotoUpload}
+          onUploadError={handleUploadError}
+          onUploadBegin={() => {
+            console.log("Upload started");
+          }}
+          appearance={{
+            container: "w-full h-auto border-0 bg-transparent p-0",
+            uploadIcon: "text-orange-500 mb-2",
+            label: "text-gray-700 font-medium text-base mb-1",
+            allowedContent: "text-gray-500 text-sm mb-4",
+            button:
+              "!bg-orange-600 !text-white !rounded-lg !px-4 !py-2 !font-semibold !text-base !border-0 hover:!bg-orange-700 !transition-all !duration-300 !cursor-pointer !shadow-md hover:!shadow-lg active:!scale-95 !min-h-[50px] !w-auto !inline-flex !items-center !justify-center disabled:!opacity-50 disabled:!cursor-not-allowed focus:!ring-2 focus:!ring-orange-500 focus:!ring-offset-2",
+          }}
+          content={{
+            uploadIcon: () => <Camera className="w-12 h-12" />,
+            label: () => <span>Uploadez une photo du chat</span>,
+            allowedContent: () => (
+              <span>Photo obligatoire pour valider le signalement</span>
+            ),
+            button: ({ ready, isUploading, uploadProgress, files }) => {
+              if (isUploading && uploadProgress !== undefined) {
+                return (
+                  <span className="flex items-center gap-3 px-6 py-3">
+                    <div className="relative">
+                      <Loader2 className="w-5 h-5 animate-spin text-white" />
+                      <div className="absolute inset-0 rounded-full border-2 border-white/30" />
+                    </div>
+                    <span className="font-semibold">
+                      Upload {uploadProgress}%
+                    </span>
+                    <div className="ml-2 bg-white/20 rounded-full h-2 w-20">
+                      <div
+                        className="bg-white rounded-full h-2 transition-all duration-300 ease-out"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </span>
+                );
+              }
+              if (isUploading) {
+                return (
+                  <span className="flex items-center gap-3 px-6 py-3">
+                    <div className="relative">
+                      <Loader2 className="w-5 h-5 animate-spin text-white" />
+                      <div className="absolute inset-0 rounded-full border-2 border-white/30" />
+                    </div>
+                    <span className="font-semibold">
+                      Traitement de l'image...
+                    </span>
+                  </span>
+                );
+              }
+              if (files && files.length > 0) {
+                return (
+                  <span className="flex items-center gap-3 px-6 py-3 bg-green-600 hover:bg-green-700 transition-colors">
+                    <CloudUpload className="w-5 h-5 text-white" />
+                    <span className="font-semibold text-white">
+                      Confirmer l'upload{" "}
+                      {files.length > 1 ? `(${files.length} photos)` : ""}
+                    </span>
+                  </span>
+                );
+              }
+              if (ready) {
+                return (
+                  <span className="flex items-center bg-orange-600 gap-3 px-6 py-3">
+                    <Camera className="w-5 h-5 text-white" />
+                    <span className="font-semibold">
+                      Sélectionner une photo
+                    </span>
+                  </span>
+                );
+              }
+              return (
+                <span className="flex items-center gap-3 px-6 py-3 opacity-60">
+                  <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  <span className="font-medium">Initialisation...</span>
+                </span>
+              );
+            },
+          }}
+        />
       </div>
     );
   }
+);
 
-  return (
-    <div className="border-2 border-dashed border-orange-300 rounded-lg p-8 bg-orange-50 text-center">
-      <UploadDropzone
-        endpoint="imageUploader"
-        onClientUploadComplete={handlePhotoUpload}
-        onUploadError={handleUploadError}
-        onUploadBegin={() => {
-          console.log('Upload started');
-        }}
-        appearance={{
-          container: "w-full h-auto border-0 bg-transparent p-0",
-          uploadIcon: "text-orange-500 mb-2",
-          label: "text-gray-700 font-medium text-base mb-1",
-          allowedContent: "text-gray-500 text-sm mb-4",
-          button: "!bg-orange-600 !text-white !rounded-lg !px-6 !py-3 !font-semibold !text-lg !border-0 hover:!bg-orange-700 !transition-all !duration-200 !cursor-pointer !shadow-md hover:!shadow-lg active:!scale-95 !min-h-[50px] !w-auto !inline-flex !items-center !justify-center"
-        }}
-        content={{
-          uploadIcon: () => <Camera className="w-12 h-12" />,
-          label: () => <span>Uploadez une photo du chat</span>,
-          allowedContent: () => <span>Photo obligatoire pour valider le signalement</span>,
-          button: ({ ready, isUploading, uploadProgress, files }) => {
-            if (isUploading && uploadProgress !== undefined) {
-              return (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Upload {uploadProgress}%
-                </span>
-              );
-            }
-            if (isUploading) {
-              return (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Upload en cours...
-                </span>
-              );
-            }
-            if (files && files.length > 0) {
-              return (
-                <span className="flex items-center gap-2">
-                  <CloudUpload className="w-4 h-4" />
-                  Uploader {files.length > 1 ? `${files.length} photos` : 'la photo'}
-                </span>
-              );
-            }
-            if (ready) {
-              return (
-                <span className="flex items-center gap-2">
-                  <Image className="w-4 h-4" />
-                  Choisir une photo
-                </span>
-              );
-            }
-            return (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Préparation...
-              </span>
-            );
-          }
-        }}
-      />
-    </div>
-  );
-});
-
-PhotoUploadSection.displayName = 'PhotoUploadSection';
+PhotoUploadSection.displayName = "PhotoUploadSection";
 
 function ReportForm() {
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     photoUrl: "",
     photoName: "",
@@ -170,65 +226,87 @@ function ReportForm() {
     name: "",
     contact: "",
     message: "",
-  })
+  });
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    // Validate that photo is uploaded
-    if (!formData.photoUrl) {
-      alert('Veuillez d\'abord uploader une photo avant de soumettre le formulaire.')
-      return
-    }
-
-    try {
-      // Submit to API with JSON data
-      const response = await fetch('/api/sightings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          contact: formData.contact,
-          location: formData.location,
-          message: formData.message,
-          photoUrl: formData.photoUrl,
-          photoName: formData.photoName,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Erreur lors de l\'envoi du signalement')
+      // Validate that photo is uploaded
+      if (!formData.photoUrl) {
+        alert(
+          "Veuillez d'abord uploader une photo avant de soumettre le formulaire."
+        );
+        return;
       }
 
-      console.log("Signalement envoyé avec succès:", result)
-      setIsSubmitted(true)
-      
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi:', error)
-      alert(`Erreur lors de l'envoi du signalement: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
-    }
-  }, [formData])
+      try {
+        // Submit to API with JSON data
+        const response = await fetch("/api/sightings", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            contact: formData.contact,
+            location: formData.location,
+            message: formData.message,
+            photoUrl: formData.photoUrl,
+            photoName: formData.photoName,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            result.error || "Erreur lors de l'envoi du signalement"
+          );
+        }
+
+        console.log("Signalement envoyé avec succès:", result);
+        setIsSubmitted(true);
+      } catch (error) {
+        console.error("Erreur lors de l'envoi:", error);
+        alert(
+          `Erreur lors de l'envoi du signalement: ${
+            error instanceof Error ? error.message : "Erreur inconnue"
+          }`
+        );
+      }
+    },
+    [formData]
+  );
 
   // Form field change handlers - memoized for performance
-  const handleLocationChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, location: e.target.value }));
-  }, []);
+  const handleLocationChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, location: e.target.value }));
+    },
+    []
+  );
 
-  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, name: e.target.value }));
-  }, []);
+  const handleNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, name: e.target.value }));
+    },
+    []
+  );
 
-  const handleContactChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, contact: e.target.value }));
-  }, []);
+  const handleContactChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, contact: e.target.value }));
+    },
+    []
+  );
 
-  const handleMessageChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, message: e.target.value }));
-  }, []);
+  const handleMessageChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setFormData((prev) => ({ ...prev, message: e.target.value }));
+    },
+    []
+  );
 
   if (isSubmitted) {
     return <SuccessMessage />;
@@ -247,7 +325,10 @@ function ReportForm() {
 
       {/* Localisation */}
       <div>
-        <Label htmlFor="location" className="text-base font-semibold text-gray-700 mb-2 block text-left">
+        <Label
+          htmlFor="location"
+          className="text-base font-semibold text-gray-700 mb-2 block text-left"
+        >
           <MapPin className="w-5 h-5 inline mr-2 text-orange-600" />
           Où l'avez-vous vu ? <span className="text-red-500">*</span>
         </Label>
@@ -265,7 +346,10 @@ function ReportForm() {
       {/* Contact */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="name" className="text-base font-semibold text-gray-700 mb-2 block text-left">
+          <Label
+            htmlFor="name"
+            className="text-base font-semibold text-gray-700 mb-2 block text-left"
+          >
             <User className="w-5 h-5 inline mr-2 text-orange-600" />
             Votre nom <span className="text-red-500">*</span>
           </Label>
@@ -281,7 +365,10 @@ function ReportForm() {
         </div>
 
         <div>
-          <Label htmlFor="contact" className="text-base font-semibold text-gray-700 mb-2 block text-left">
+          <Label
+            htmlFor="contact"
+            className="text-base font-semibold text-gray-700 mb-2 block text-left"
+          >
             <Phone className="w-5 h-5 inline mr-2 text-orange-600" />
             Téléphone <span className="text-red-500">*</span>
           </Label>
@@ -299,7 +386,10 @@ function ReportForm() {
 
       {/* Message */}
       <div>
-        <Label htmlFor="message" className="text-base font-semibold text-gray-700 mb-2 block text-left">
+        <Label
+          htmlFor="message"
+          className="text-base font-semibold text-gray-700 mb-2 block text-left"
+        >
           <MessageCircle className="w-5 h-5 inline mr-2 text-orange-600" />
           Détails utiles
         </Label>
@@ -316,8 +406,8 @@ function ReportForm() {
       {/* RGPD */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
-          <strong>Confidentialité :</strong> Vos données ne sont utilisées que pour la recherche de Tao. Aucune revente,
-          conformément au RGPD.
+          <strong>Confidentialité :</strong> Vos données ne sont utilisées que
+          pour la recherche de Tao. Aucune revente, conformément au RGPD.
         </p>
       </div>
 
@@ -331,7 +421,7 @@ function ReportForm() {
         Je signale une piste
       </Button>
     </form>
-  )
+  );
 }
 
 export default memo(ReportForm);

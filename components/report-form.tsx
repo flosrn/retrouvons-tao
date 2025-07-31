@@ -14,13 +14,9 @@ import {
   Phone,
   Send,
   User,
-  Upload,
-  Loader2,
-  CloudUpload,
-  Image,
 } from "lucide-react";
 import type React from "react";
-import { useState, useCallback, memo } from "react";
+import { memo, useCallback, useState } from "react";
 
 // Success message component - memoized for performance
 const SuccessMessage = memo(() => (
@@ -125,92 +121,18 @@ const PhotoUploadSection = memo(
     }
 
     return (
-      <div className="border-2 border-dashed border-orange-300 rounded-lg p-8 bg-orange-50 text-center">
-        <UploadDropzone
-          endpoint="imageUploader"
-          onClientUploadComplete={handlePhotoUpload}
-          onUploadError={handleUploadError}
-          onUploadBegin={() => {
-            console.log("Upload started");
-          }}
-          appearance={{
-            container: "w-full h-auto border-0 bg-transparent p-0",
-            uploadIcon: "text-orange-500 mb-2",
-            label: "text-gray-700 font-medium text-base mb-1",
-            allowedContent: "text-gray-500 text-sm mb-4",
-            button:
-              "!bg-orange-600 !text-white !rounded-lg !px-4 !py-2 !font-semibold !text-base !border-0 hover:!bg-orange-700 !transition-all !duration-300 !cursor-pointer !shadow-md hover:!shadow-lg active:!scale-95 !min-h-[50px] !w-auto !inline-flex !items-center !justify-center disabled:!opacity-50 disabled:!cursor-not-allowed focus:!ring-2 focus:!ring-orange-500 focus:!ring-offset-2",
-          }}
-          content={{
-            uploadIcon: () => <Camera className="w-12 h-12" />,
-            label: () => <span>Uploadez une photo du chat</span>,
-            allowedContent: () => (
-              <span>Photo obligatoire pour valider le signalement</span>
-            ),
-            button: ({ ready, isUploading, uploadProgress, files }) => {
-              if (isUploading && uploadProgress !== undefined) {
-                return (
-                  <span className="flex items-center gap-3 px-6 py-3">
-                    <div className="relative">
-                      <Loader2 className="w-5 h-5 animate-spin text-white" />
-                      <div className="absolute inset-0 rounded-full border-2 border-white/30" />
-                    </div>
-                    <span className="font-semibold">
-                      Upload {uploadProgress}%
-                    </span>
-                    <div className="ml-2 bg-white/20 rounded-full h-2 w-20">
-                      <div
-                        className="bg-white rounded-full h-2 transition-all duration-300 ease-out"
-                        style={{ width: `${uploadProgress}%` }}
-                      />
-                    </div>
-                  </span>
-                );
-              }
-              if (isUploading) {
-                return (
-                  <span className="flex items-center gap-3 px-6 py-3">
-                    <div className="relative">
-                      <Loader2 className="w-5 h-5 animate-spin text-white" />
-                      <div className="absolute inset-0 rounded-full border-2 border-white/30" />
-                    </div>
-                    <span className="font-semibold">
-                      Traitement de l'image...
-                    </span>
-                  </span>
-                );
-              }
-              if (files && files.length > 0) {
-                return (
-                  <span className="flex items-center gap-3 px-6 py-3 bg-green-600 hover:bg-green-700 transition-colors">
-                    <CloudUpload className="w-5 h-5 text-white" />
-                    <span className="font-semibold text-white">
-                      Confirmer l'upload{" "}
-                      {files.length > 1 ? `(${files.length} photos)` : ""}
-                    </span>
-                  </span>
-                );
-              }
-              if (ready) {
-                return (
-                  <span className="flex items-center bg-orange-600 gap-3 px-6 py-3">
-                    <Camera className="w-5 h-5 text-white" />
-                    <span className="font-semibold">
-                      Sélectionner une photo
-                    </span>
-                  </span>
-                );
-              }
-              return (
-                <span className="flex items-center gap-3 px-6 py-3 opacity-60">
-                  <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  <span className="font-medium">Initialisation...</span>
-                </span>
-              );
-            },
-          }}
-        />
-      </div>
+      <UploadDropzone
+        endpoint="imageUploader"
+        onClientUploadComplete={handlePhotoUpload}
+        onUploadError={handleUploadError}
+        onUploadBegin={() => {
+          console.log("Upload started");
+        }}
+        content={{
+          label: "Choisissez une image dans votre galerie",
+          allowedContent: "Image (8MB)",
+        }}
+      />
     );
   }
 );

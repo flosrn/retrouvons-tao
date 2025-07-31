@@ -166,67 +166,6 @@
     background-clip: text;
   }
 
-  /* UploadThing button overrides pour le thème orange */
-  [data-ut-element="button"][data-state="ready"],
-  .ut-button[data-state="ready"],
-  [data-ut-element="button"],
-  .ut-button {
-    background-color: #ea580c !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 0.5rem !important;
-    padding: 0.75rem 1.5rem !important;
-    font-weight: 600 !important;
-    font-size: 1.125rem !important;
-    min-height: 50px !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  [data-ut-element="button"][data-state="ready"]:hover,
-  .ut-button[data-state="ready"]:hover,
-  [data-ut-element="button"]:hover,
-  .ut-button:hover {
-    background-color: #c2410c !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-    transform: translateY(-1px) !important;
-  }
-
-  [data-ut-element="button"][data-state="uploading"],
-  .ut-button[data-state="uploading"] {
-    background-color: #fb923c !important;
-    cursor: not-allowed !important;
-    opacity: 0.8 !important;
-  }
-
-  /* UploadThing container styling */
-  .ut-dropzone-container {
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-  }
-
-  .ut-upload-icon {
-    color: #f97316 !important;
-    margin-bottom: 0.5rem !important;
-  }
-
-  .ut-label {
-    color: #374151 !important;
-    font-weight: 500 !important;
-    font-size: 1rem !important;
-    margin-bottom: 0.25rem !important;
-  }
-
-  .ut-allowed-content {
-    color: #6b7280 !important;
-    font-size: 0.875rem !important;
-    margin-bottom: 1rem !important;
-  }
 }
 
 @keyframes gentle-pulse {

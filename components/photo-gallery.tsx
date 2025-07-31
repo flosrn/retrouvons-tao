@@ -85,14 +85,12 @@ const mediaConfig = [
 const VideoComponent = memo(
   ({
     item,
-    index,
     isModal,
     onPlay,
     onPause,
     videoRef,
   }: {
     item: (typeof mediaConfig)[0];
-    index: number;
     isModal: boolean;
     onPlay: () => void;
     onPause: () => void;
@@ -161,10 +159,12 @@ const ThumbnailComponent = memo(
     item,
     index,
     onOpen,
+    isSelected = false,
   }: {
     item: (typeof mediaConfig)[0];
     index: number;
     onOpen: (index: number) => void;
+    isSelected?: boolean;
   }) => {
     const handleClick = useCallback(() => onOpen(index), [index, onOpen]);
 
@@ -173,14 +173,18 @@ const ThumbnailComponent = memo(
         key={`thumb-${item.src}`}
         className="pl-2 basis-1/3 md:basis-1/4"
       >
-        <div className="text-center">
+        <div className="text-center p-2">
           <div
-            className="relative group cursor-pointer"
+            className={`relative group cursor-pointer transition-all duration-200 ${
+              isSelected 
+                ? "ring-2 ring-orange-500 ring-offset-2 rounded-lg scale-105" 
+                : "hover:scale-105"
+            }`}
             onClick={handleClick}
             onKeyDown={(e) => e.key === "Enter" && handleClick()}
             tabIndex={0}
             role="button"
-            aria-label={`Ouvrir ${
+            aria-label={`Sélectionner ${
               item.type === "video" ? "la vidéo" : "la photo"
             } : ${item.caption}`}
           >
@@ -230,13 +234,14 @@ function PhotoGallery() {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const carouselVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const modalVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [modalApi, setModalApi] = useState<CarouselApi>();
   const [modalCurrentIndex, setModalCurrentIndex] = useState(0);
-  const [modalCount, setModalCount] = useState(0);
+  
+  // API pour le carousel de thumbnails
+  const [thumbApi, setThumbApi] = useState<CarouselApi>();
 
   // Use stable reference to media config
   const media = useMemo(() => mediaConfig, []);
@@ -348,18 +353,21 @@ function PhotoGallery() {
     [media, handleModalVideoAutoplay]
   );
 
-  const closePhoto = useCallback(() => {
-    setIsDialogOpen(false);
-    setSelectedPhotoIndex(null);
-    // Pause all modal videos when closing
-    modalVideoRefs.current.forEach((video) => {
-      if (video) {
-        video.pause();
-        video.currentTime = 0;
+  // Fonction pour changer la photo depuis les thumbnails (sans ouvrir le dialog)
+  const handleThumbnailClick = useCallback(
+    (index: number) => {
+      // Synchroniser le carousel principal
+      if (api) {
+        api.scrollTo(index);
       }
-    });
-    setIsVideoPlaying(false);
-  }, []);
+      // Centrer le thumbnail sélectionné
+      if (thumbApi) {
+        thumbApi.scrollTo(index);
+      }
+    },
+    [api, thumbApi]
+  );
+
 
   const renderMediaItem = useCallback(
     (item: (typeof media)[0], index: number, isModal = false) => {
@@ -367,10 +375,9 @@ function PhotoGallery() {
         return (
           <VideoComponent
             item={item}
-            index={index}
             isModal={isModal}
-            onPlay={() => setIsVideoPlaying(true)}
-            onPause={() => setIsVideoPlaying(false)}
+            onPlay={() => {}}
+            onPause={() => {}}
             videoRef={
               isModal
                 ? (el) => {
@@ -405,6 +412,11 @@ function PhotoGallery() {
       const currentIndex = api.selectedScrollSnap();
       setCurrent(currentIndex + 1);
 
+      // Centrer le thumbnail sélectionné dans le carousel
+      if (thumbApi) {
+        thumbApi.scrollTo(currentIndex);
+      }
+
       // Auto-play video when it comes into view
       handleVideoAutoplay(currentIndex);
     });
@@ -422,7 +434,7 @@ function PhotoGallery() {
       document.removeEventListener("click", enableAutoplay);
       document.removeEventListener("touchstart", enableAutoplay);
     };
-  }, [api, handleVideoAutoplay]);
+  }, [api, thumbApi, handleVideoAutoplay]);
 
   // Modal carousel state and autoplay
   useEffect(() => {
@@ -430,7 +442,6 @@ function PhotoGallery() {
       return;
     }
 
-    setModalCount(modalApi.scrollSnapList().length);
     setModalCurrentIndex(modalApi.selectedScrollSnap());
 
     modalApi.on("select", () => {
@@ -460,8 +471,8 @@ function PhotoGallery() {
         </CardHeader>
         <CardContent>
           {/* Enhanced Carousel with empathy design */}
-          <div className="mb-8 relative">
-            <div className="relative bg-white/50 backdrop-blur-sm rounded-3xl p-4 shadow-empathy">
+          <div className="relative">
+            <div className="relative bg-white/50 backdrop-blur-sm rounded-3xl p-4">
               <Carousel
                 setApi={setApi}
                 className="w-full max-w-sm mx-auto"
@@ -481,7 +492,7 @@ function PhotoGallery() {
                         role="button"
                         aria-label={`Ouvrir ${
                           item.type === "video" ? "la vidéo" : "la photo"
-                        } : ${item.caption}`}
+                        } en plein écran : ${item.caption}`}
                       >
                         <div className="relative">
                           {renderMediaItem(item, index, false)}
@@ -497,8 +508,8 @@ function PhotoGallery() {
             </div>
 
             {/* Enhanced photo counter with progress */}
-            <div className="text-center mt-6">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-empathy mx-4">
+            <div className="text-center">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 mx-4">
                 <div className="flex items-center justify-center gap-3 mb-2">
                   <span className="text-2xl">📸</span>
                   <div className="flex flex-col">
@@ -538,10 +549,12 @@ function PhotoGallery() {
           {/* Thumbnails carousel */}
           <div className="mt-4">
             <Carousel
+              setApi={setThumbApi}
               className="w-full max-w-md mx-auto"
               opts={{
-                align: "start",
+                align: "center",
                 dragFree: true,
+                containScroll: "trimSnaps",
               }}
             >
               <CarouselContent className="-ml-2">
@@ -550,7 +563,8 @@ function PhotoGallery() {
                     key={`thumb-${item.src}`}
                     item={item}
                     index={index}
-                    onOpen={openPhoto}
+                    onOpen={handleThumbnailClick}
+                    isSelected={current - 1 === index}
                   />
                 ))}
               </CarouselContent>
@@ -650,7 +664,22 @@ function PhotoGallery() {
       </Card>
 
       {/* Modal avec CSS Grid - Design playful avec arrondis */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog 
+        open={isDialogOpen} 
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setSelectedPhotoIndex(null);
+            // Pause all modal videos when closing
+            modalVideoRefs.current.forEach((video) => {
+              if (video) {
+                video.pause();
+                video.currentTime = 0;
+              }
+            });
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-4xl w-full max-w-[95vw] h-[90vh] p-0 gap-0 rounded-3xl overflow-hidden shadow-2xl">
           {/* Structure CSS Grid avec hauteurs fixes garanties */}
           <div

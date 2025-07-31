@@ -107,11 +107,11 @@ const VideoComponent = memo(
           ? "max-w-full max-h-full w-auto h-auto object-contain shadow-xl rounded-lg"
           : "w-full aspect-square object-cover rounded-xl border-2 border-orange-200"
       }`}
-      controls={isModal}
+      controls={false}
       preload="metadata"
       playsInline
       webkit-playsinline="true"
-      muted={!isModal}
+      muted
       onPlay={onPlay}
       onPause={onPause}
     >

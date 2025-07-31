@@ -1,4 +1,4 @@
-import { AlertCircle, Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { ComicText } from "@/components/magicui/comic-text";
@@ -6,7 +6,9 @@ import TaoHeroImage from "@/components/tao-hero-image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Mobile-optimized layout
-const MobileOptimizedLayout = dynamic(() => import("@/components/mobile-optimized-layout"));
+const MobileOptimizedLayout = dynamic(
+  () => import("@/components/mobile-optimized-layout")
+);
 
 // Lazy loading des composants lourds avec des skeletons optimisés
 const PhotoGallery = dynamic(() => import("@/components/photo-gallery"), {
@@ -21,7 +23,10 @@ const PhotoGallery = dynamic(() => import("@/components/photo-gallery"), {
         </div>
         <div className="mt-4 flex gap-2 justify-center">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="w-16 h-16 bg-gray-200 rounded-lg animate-pulse" />
+            <div
+              key={i}
+              className="w-16 h-16 bg-gray-200 rounded-lg animate-pulse"
+            />
           ))}
         </div>
       </CardContent>
@@ -82,12 +87,13 @@ export default function FindTaoPage() {
       {/* Badge récompense fixe en haut avec animation - Mobile optimized */}
       <div className="sticky top-0 z-50 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 text-white py-3 sm:py-4 px-4 text-center shadow-lg sticky-header">
         <div className="flex items-center justify-center gap-2 sm:gap-3">
-          <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
-          <span className="font-black text-lg sm:text-xl tracking-wide truncate">
+          <div className="">💰</div>
+          <span className="font-black text-lg sm:text-xl tracking-wide truncate drop-shadow-lg">
             500 € DE RÉCOMPENSE
           </span>
-          <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+          <div className="">💰</div>
         </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer opacity-30"></div>
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -170,16 +176,18 @@ export default function FindTaoPage() {
           </Card>
 
           {/* Galerie Photos - Chargement prioritaire */}
-          <Suspense fallback={
-            <Card className="mb-8 bg-white border-gray-200">
-              <CardHeader className="text-center pb-4">
-                <div className="h-6 bg-gray-200 rounded mx-auto w-48 animate-pulse" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-80 bg-gray-200 rounded-3xl animate-pulse" />
-              </CardContent>
-            </Card>
-          }>
+          <Suspense
+            fallback={
+              <Card className="mb-8 bg-white border-gray-200">
+                <CardHeader className="text-center pb-4">
+                  <div className="h-6 bg-gray-200 rounded mx-auto w-48 animate-pulse" />
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80 bg-gray-200 rounded-3xl animate-pulse" />
+                </CardContent>
+              </Card>
+            }
+          >
             <PhotoGallery />
           </Suspense>
 
@@ -192,39 +200,50 @@ export default function FindTaoPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <Suspense fallback={
-                <div className="h-96 bg-gray-100 rounded-lg animate-pulse flex items-center justify-center">
-                  <div className="text-gray-500">Chargement du formulaire...</div>
-                </div>
-              }>
+              <Suspense
+                fallback={
+                  <div className="h-96 bg-gray-100 rounded-lg animate-pulse flex items-center justify-center">
+                    <div className="text-gray-500">
+                      Chargement du formulaire...
+                    </div>
+                  </div>
+                }
+              >
                 <ReportForm />
               </Suspense>
             </CardContent>
           </Card>
 
           {/* Section Récompense - Lazy loaded */}
-          <Suspense fallback={
-            <Card className="mb-8">
-              <CardContent className="p-8">
-                <div className="h-32 bg-gray-200 rounded animate-pulse" />
-              </CardContent>
-            </Card>
-          }>
+          <Suspense
+            fallback={
+              <Card className="mb-8">
+                <CardContent className="p-8">
+                  <div className="h-32 bg-gray-200 rounded animate-pulse" />
+                </CardContent>
+              </Card>
+            }
+          >
             <RewardSection />
           </Suspense>
 
           {/* Conseils - Lazy loaded */}
-          <Suspense fallback={
-            <Card className="mb-8">
-              <CardContent className="p-8">
-                <div className="space-y-4">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="h-16 bg-gray-200 rounded animate-pulse" />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          }>
+          <Suspense
+            fallback={
+              <Card className="mb-8">
+                <CardContent className="p-8">
+                  <div className="space-y-4">
+                    {[...Array(4)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-16 bg-gray-200 rounded animate-pulse"
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            }
+          >
             <TipsSection />
           </Suspense>
 

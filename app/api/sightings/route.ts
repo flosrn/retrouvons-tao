@@ -49,9 +49,18 @@ export async function POST(request: NextRequest) {
       photo_url: photoUrl
     })
     
-    // Send Telegram notification
+    // Send Telegram notification with detailed logging
+    console.log('🚀 Starting Telegram notification process...')
+    const botToken = process.env.TELEGRAM_BOT_TOKEN
     const chatId = process.env.TELEGRAM_CHAT_ID
-    if (chatId) {
+    
+    console.log('📊 Environment variables check:')
+    console.log('- TELEGRAM_BOT_TOKEN exists:', !!botToken, botToken ? '(length: ' + botToken.length + ')' : '(undefined)')
+    console.log('- TELEGRAM_CHAT_ID exists:', !!chatId, chatId || '(undefined)')
+    
+    if (chatId && botToken) {
+      console.log('✅ Both Telegram variables are present, proceeding with notification...')
+      
       const telegramMessage = createFormSubmissionMessage({
         name: name.trim(),
         email: undefined, // No email field in the form
@@ -62,12 +71,29 @@ export async function POST(request: NextRequest) {
         timestamp: new Date()
       })
       
-      // Send notification asynchronously (don't wait for it to complete)
-      sendTelegramNotification(chatId, telegramMessage).catch(error => {
-        console.error('Failed to send Telegram notification:', error)
-      })
+      console.log('📝 Telegram message created (length: ' + telegramMessage.length + ' chars)')
+      console.log('🎯 Attempting to send to chat ID:', chatId)
+      
+      try {
+        // Send notification and wait for completion to catch errors
+        const telegramResult = await sendTelegramNotification(chatId, telegramMessage)
+        if (telegramResult) {
+          console.log('✅ Telegram notification sent successfully!')
+        } else {
+          console.error('❌ Telegram notification failed (returned false)')
+        }
+      } catch (error) {
+        console.error('❌ Failed to send Telegram notification:', error)
+        console.error('Error details:', {
+          name: (error as any)?.name,
+          message: (error as any)?.message,
+          stack: (error as any)?.stack
+        })
+      }
     } else {
-      console.warn('TELEGRAM_CHAT_ID not configured - skipping notification')
+      console.warn('⚠️ Telegram notification skipped - missing variables:')
+      console.warn('- BOT_TOKEN missing:', !botToken)
+      console.warn('- CHAT_ID missing:', !chatId)
     }
     
     // Return success response
@@ -78,7 +104,12 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
     
   } catch (error) {
-    console.error('Error processing sighting report:', error)
+    console.error('❌ Error processing sighting report:', error)
+    console.error('Error details:', {
+      name: (error as any)?.name,
+      message: (error as any)?.message,
+      stack: (error as any)?.stack
+    })
     
     return NextResponse.json(
       { error: 'Erreur interne du serveur. Veuillez réessayer.' },

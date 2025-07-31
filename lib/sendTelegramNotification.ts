@@ -8,17 +8,26 @@ export async function sendTelegramNotification(
   chatId: string,
   message: string
 ): Promise<boolean> {
+  console.log('🚀 sendTelegramNotification called with:')
+  console.log('- chatId:', chatId)
+  console.log('- message length:', message.length)
+  
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  console.log('- botToken from env:', !!botToken, botToken ? '(length: ' + botToken.length + ')' : '(undefined)')
 
   // Don't send notification if token or chatId are undefined
   if (!botToken || !chatId) {
-    console.error("Telegram bot token or chat ID is missing");
+    console.error("❌ Telegram bot token or chat ID is missing:");
+    console.error('- botToken missing:', !botToken)
+    console.error('- chatId missing:', !chatId)
     return false;
   }
 
   const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+  console.log('🎯 Telegram API URL prepared (token hidden)');
 
   try {
+    console.log('🚀 Making fetch request to Telegram API...');
     const response = await fetch(telegramApiUrl, {
       method: "POST",
       headers: {
@@ -31,17 +40,33 @@ export async function sendTelegramNotification(
       }),
     });
 
+    console.log('📊 Response received - Status:', response.status, response.statusText);
+
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Telegram API error:", errorData);
+      console.error("❌ Telegram API error response:", errorData);
+      console.error('Full response details:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        errorData
+      });
       return false;
     }
 
     const data = await response.json();
-    console.log("Telegram message sent successfully:", data.result.message_id);
+    console.log("✅ Telegram message sent successfully!");
+    console.log('- Message ID:', data.result.message_id);
+    console.log('- Full response:', data);
     return true;
   } catch (error) {
-    console.error("Error sending Telegram notification:", error);
+    console.error("❌ Error sending Telegram notification:", error);
+    console.error('Error details:', {
+      name: (error as any)?.name,
+      message: (error as any)?.message,
+      stack: (error as any)?.stack,
+      cause: (error as any)?.cause
+    });
     return false;
   }
 }

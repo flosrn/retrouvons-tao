@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSightingReport, initializeDatabase } from '@/lib/db'
+import { sendTelegramNotification, createFormSubmissionMessage } from '@/lib/sendTelegramNotification'
 
 // Initialize database on startup
 let dbInitialized = false
@@ -47,6 +48,27 @@ export async function POST(request: NextRequest) {
       photo_filename: photoName || undefined,
       photo_url: photoUrl
     })
+    
+    // Send Telegram notification
+    const chatId = process.env.TELEGRAM_CHAT_ID
+    if (chatId) {
+      const telegramMessage = createFormSubmissionMessage({
+        name: name.trim(),
+        email: undefined, // No email field in the form
+        phone: contact.trim(),
+        location: location.trim(),
+        description: message?.trim(),
+        photoUrl: photoUrl,
+        timestamp: new Date()
+      })
+      
+      // Send notification asynchronously (don't wait for it to complete)
+      sendTelegramNotification(chatId, telegramMessage).catch(error => {
+        console.error('Failed to send Telegram notification:', error)
+      })
+    } else {
+      console.warn('TELEGRAM_CHAT_ID not configured - skipping notification')
+    }
     
     // Return success response
     return NextResponse.json({

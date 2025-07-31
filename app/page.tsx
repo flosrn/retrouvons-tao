@@ -1,6 +1,7 @@
 import { Heart, MessageCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { Toaster } from "sonner";
 import { ComicText } from "@/components/magicui/comic-text";
 import TaoHeroImage from "@/components/tao-hero-image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -83,7 +84,21 @@ export default function FindTaoPage() {
     "Aidez-nous à retrouver Tao, chat perdu à Toulouse ! 500€ de récompense";
 
   return (
-    <MobileOptimizedLayout className="bg-orange-100">
+    <>
+      <Toaster 
+        position="top-center" 
+        richColors 
+        expand 
+        visibleToasts={3}
+        toastOptions={{
+          style: {
+            background: 'white',
+            border: '1px solid #e5e7eb',
+            color: '#374151',
+          },
+        }}
+      />
+      <MobileOptimizedLayout className="bg-orange-100">
       {/* Badge récompense fixe en haut avec animation - Mobile optimized */}
       <div className="sticky top-0 z-50 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 text-white py-3 sm:py-4 px-4 text-center shadow-lg sticky-header">
         <div className="flex items-center justify-center gap-2 sm:gap-3">
@@ -262,6 +277,7 @@ export default function FindTaoPage() {
           </div>
         </div>
       </div>
-    </MobileOptimizedLayout>
+      </MobileOptimizedLayout>
+    </>
   );
 }

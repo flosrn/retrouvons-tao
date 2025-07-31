@@ -16,25 +16,28 @@ import {
   User,
 } from "lucide-react";
 import type React from "react";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 
 // Success message component - memoized for performance
-const SuccessMessage = memo(() => (
-  <Card className="bg-green-50 border-green-200">
-    <CardContent className="p-6 text-center">
-      <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-      <h3 className="text-xl font-bold text-green-800 mb-2">
-        Merci pour votre signalement !
-      </h3>
-      <p className="text-green-700 mb-4">
-        Nous avons bien reçu votre message. Nous vous contacterons rapidement
-        pour vérifier les informations.
-      </p>
-      <p className="text-sm text-green-600">
-        Si c'est bien Tao, la récompense de 500€ vous sera remise !
-      </p>
-    </CardContent>
-  </Card>
+const SuccessMessage = memo(({ successMessageRef }: { successMessageRef: React.RefObject<HTMLDivElement | null> }) => (
+  <div ref={successMessageRef}>
+    <Card className="bg-green-50 border-green-200">
+      <CardContent className="p-6 text-center">
+        <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-green-800 mb-2">
+          Merci pour votre signalement !
+        </h3>
+        <p className="text-green-700 mb-4">
+          Nous avons bien reçu votre message. Nous vous contacterons rapidement
+          pour vérifier les informations.
+        </p>
+        <p className="text-sm text-green-600">
+          Si c'est bien Tao, la récompense de 500€ vous sera remise !
+        </p>
+      </CardContent>
+    </Card>
+  </div>
 ));
 
 SuccessMessage.displayName = "SuccessMessage";
@@ -154,6 +157,7 @@ function ReportForm() {
     contact: "",
     message: "",
   });
+  const successMessageRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -194,13 +198,26 @@ function ReportForm() {
 
         console.log("Signalement envoyé avec succès:", result);
         setIsSubmitted(true);
+        
+        // Afficher le toast de succès
+        toast.success("Signalement envoyé !", {
+          description: "Nous vous contacterons rapidement pour vérifier les informations.",
+          duration: 5000,
+        });
+        
+        // Scroll smooth vers le message de succès après un court délai
+        setTimeout(() => {
+          successMessageRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
       } catch (error) {
         console.error("Erreur lors de l'envoi:", error);
-        alert(
-          `Erreur lors de l'envoi du signalement: ${
-            error instanceof Error ? error.message : "Erreur inconnue"
-          }`
-        );
+        toast.error("Erreur lors de l'envoi", {
+          description: error instanceof Error ? error.message : "Erreur inconnue",
+          duration: 5000,
+        });
       }
     },
     [formData]
@@ -236,7 +253,7 @@ function ReportForm() {
   );
 
   if (isSubmitted) {
-    return <SuccessMessage />;
+    return <SuccessMessage successMessageRef={successMessageRef} />;
   }
 
   return (
